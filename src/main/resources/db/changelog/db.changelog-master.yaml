@@ -1,0 +1,64 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20210724-1600
+      author: iuri.vargas
+      comment: Criando schema okr
+      changes:
+        - sqlFile:
+            path: changes/001-create-schema.sql
+            splitStatements: false
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 20210724-1601
+      author: iuri.vargas
+      comment: Criando tabela de ciclos do okr
+      changes:
+        - sqlFile:
+            path: changes/002-create-table-cycle.sql
+            splitStatements: false
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 20210724-1602
+      author: iuri.vargas
+      comment: Criando tabela de objetivos do okr
+      changes:
+        - sqlFile:
+            path: changes/003-create-table-objective.sql
+            splitStatements: false
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 20210724-1603
+      author: iuri.vargas
+      comment: Criando tabela de equipes
+      changes:
+        - sqlFile:
+            path: changes/004-create-table-team.sql
+            splitStatements: false
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 20210724-1604
+      author: iuri.vargas
+      comment: Criando tabela de key result do okr
+      changes:
+        - sqlFile:
+            path: changes/005-create-table-kr.sql
+            splitStatements: false
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 20210724-1605
+      author: iuri.vargas
+      comment: Criando tabela de iniciativas do okr
+      changes:
+        - sqlFile:
+            path: changes/006-create-table-initiative.sql
+            splitStatements: false
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 20210724-1606
+      author: iuri.vargas
+      comment: Inserindo valores iniciasis nas tabelas de equipes
+      changes:
+        - sqlFile:
+            path: changes/007-insert-into-team.sql
+            splitStatements: false
+            relativeToChangelogFile: true
