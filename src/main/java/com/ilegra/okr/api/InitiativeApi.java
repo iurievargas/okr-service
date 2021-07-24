@@ -1,8 +1,6 @@
 package com.ilegra.okr.api;
 
 
-import com.ilegra.okr.dto.InitiativeDto;
-import com.ilegra.okr.model.ErrorMessageModel;
 import com.ilegra.okr.model.InitiativeModel;
 import com.ilegra.okr.service.InitiativeService;
 import java.util.List;
@@ -12,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,23 +50,13 @@ public class InitiativeApi {
 
   @GetMapping("/{id}")
   public ResponseEntity<InitiativeModel> getById(@PathVariable("id") Integer id) {
-
-    InitiativeDto dto = this.service.getById(id);
-
-    return new ResponseEntity<>(mapper.map(dto, InitiativeModel.class),
+    return new ResponseEntity<>(mapper.map(this.service.getById(id), InitiativeModel.class),
         HttpStatus.OK);
   }
 
   @GetMapping
   public ResponseEntity<List<InitiativeModel>> getAll() {
-
-    List<InitiativeDto> initiatives = this.service.getAll();
-
-    if (initiatives.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    return new ResponseEntity<>(initiatives.stream()
+    return new ResponseEntity<>(this.service.getAll().stream()
         .map(dto -> mapper.map(dto, InitiativeModel.class))
         .collect(Collectors.toList()),
         HttpStatus.OK);

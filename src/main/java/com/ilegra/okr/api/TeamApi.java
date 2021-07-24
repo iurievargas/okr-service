@@ -1,8 +1,6 @@
 package com.ilegra.okr.api;
 
 
-import com.ilegra.okr.dto.KeyResultDto;
-import com.ilegra.okr.dto.TeamDto;
 import com.ilegra.okr.model.KeyResultModel;
 import com.ilegra.okr.model.TeamModel;
 import com.ilegra.okr.service.KeyResultService;
@@ -57,22 +55,13 @@ public class TeamApi {
 
   @GetMapping("/{id}")
   public ResponseEntity<TeamModel> getById(@PathVariable("id") Integer id) {
-
-    TeamDto dto = this.service.getById(id);
-
-    return new ResponseEntity<>(mapper.map(dto, TeamModel.class),
+    return new ResponseEntity<>(mapper.map(this.service.getById(id), TeamModel.class),
         HttpStatus.OK);
   }
 
   @GetMapping
   public ResponseEntity<List<TeamModel>> getAll() {
-    List<TeamDto> teams = this.service.getAll();
-
-    if (teams.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    return new ResponseEntity<>(teams.stream()
+    return new ResponseEntity<>(this.service.getAll().stream()
         .map(entity -> mapper.map(entity, TeamModel.class))
         .collect(Collectors.toList()),
         HttpStatus.OK);
@@ -80,14 +69,7 @@ public class TeamApi {
 
   @GetMapping("/{id}/key-results")
   public ResponseEntity<List<KeyResultModel>> getAllKeyResultsById(@PathVariable("id") Integer id) {
-
-    List<KeyResultDto> keyResults = this.keyResultService.getAllByObjectiveId(id);
-
-    if (keyResults.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    return new ResponseEntity<>(keyResults.stream()
+    return new ResponseEntity<>(this.keyResultService.getAllByObjectiveId(id).stream()
         .map(dto -> mapper.map(dto, KeyResultModel.class))
         .collect(Collectors.toList()),
         HttpStatus.OK);

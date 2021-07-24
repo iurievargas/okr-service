@@ -1,8 +1,6 @@
 package com.ilegra.okr.api;
 
 
-import com.ilegra.okr.dto.InitiativeDto;
-import com.ilegra.okr.dto.KeyResultDto;
 import com.ilegra.okr.model.InitiativeModel;
 import com.ilegra.okr.model.KeyResultModel;
 import com.ilegra.okr.service.InitiativeService;
@@ -57,21 +55,13 @@ public class KeyResultApi {
 
   @GetMapping("/{id}")
   public ResponseEntity<KeyResultModel> getById(@PathVariable("id") Integer id) {
-    KeyResultDto dto = this.service.getById(id);
-
-    return new ResponseEntity<>(mapper.map(dto, KeyResultModel.class),
+    return new ResponseEntity<>(mapper.map(this.service.getById(id), KeyResultModel.class),
         HttpStatus.OK);
   }
 
   @GetMapping
   public ResponseEntity<List<KeyResultModel>> getAll() {
-    List<KeyResultDto> keyResults = this.service.getAll();
-
-    if (keyResults.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    return new ResponseEntity<>(keyResults.stream()
+    return new ResponseEntity<>(this.service.getAll().stream()
         .map(dto -> mapper.map(dto, KeyResultModel.class))
         .collect(Collectors.toList()),
         HttpStatus.OK);
@@ -80,13 +70,7 @@ public class KeyResultApi {
   @GetMapping("/{id}/initiatives")
   public ResponseEntity<List<InitiativeModel>> getAllInitiativesById(
       @PathVariable("id") Integer id) {
-    List<InitiativeDto> initiatives = this.initiativeService.getAllByKeyResultId(id);
-
-    if (initiatives.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    return new ResponseEntity<>(initiatives.stream()
+    return new ResponseEntity<>(this.initiativeService.getAllByKeyResultId(id).stream()
         .map(dto -> mapper.map(dto, InitiativeModel.class))
         .collect(Collectors.toList()),
         HttpStatus.OK);
