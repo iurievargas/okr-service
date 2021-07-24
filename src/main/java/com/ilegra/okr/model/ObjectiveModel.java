@@ -1,7 +1,6 @@
 package com.ilegra.okr.model;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import lombok.Data;
 
 @Data
@@ -14,6 +13,4 @@ public class ObjectiveModel {
   private LocalDateTime createdDate;
 
   private String type;
-
-  private Set<KeyResultModel> keyResults;
 }
