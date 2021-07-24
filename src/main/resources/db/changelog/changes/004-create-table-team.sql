@@ -1,9 +1,9 @@
 CREATE TABLE okr.team
 (
-    id INT NOT NULL AUTO_INCREMENT,
+    team_id INT NOT NULL AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
 
-    PRIMARY KEY (id)
+    PRIMARY KEY (team_id)
 )
 
 

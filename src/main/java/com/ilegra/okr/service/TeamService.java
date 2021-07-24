@@ -1,30 +1,74 @@
 package com.ilegra.okr.service;
 
-import com.ilegra.okr.config.ModelMapperConfig;
 import com.ilegra.okr.dto.TeamDto;
+import com.ilegra.okr.entity.TeamEntity;
+import com.ilegra.okr.model.TeamModel;
 import com.ilegra.okr.repository.TeamRepository;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 public class TeamService {
 
-	@Autowired
-	private TeamRepository teamRepository;
+  private static final String NOT_FOUND_MESSAGE = "There is no team with this id";
 
-	@Autowired
-	private ModelMapper modelMapper;
+  @Autowired
+  private TeamRepository repository;
 
-	public List<TeamDto> getAllTeams(){
+  @Autowired
+  private ModelMapper mapper;
 
-		return this.teamRepository.findAll()
-				.stream()
-				.map(x -> modelMapper.map(x, TeamDto.class))
-				.collect(Collectors.toList());
-	}
+  public TeamDto save(TeamModel model) {
+    return mapper
+        .map(repository.save(mapper.map(model, TeamEntity.class)), TeamDto.class);
+  }
+
+  public TeamDto update(TeamModel model, Integer id) {
+
+    Optional<TeamEntity> entity = repository.findById(id);
+
+    if (entity.isEmpty()){
+      throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+    }
+
+    TeamEntity teamEntity = mapper.map(model, TeamEntity.class);
+    teamEntity.setId(id);
+
+    return mapper
+        .map(repository.save(teamEntity), TeamDto.class);
+  }
+
+  public void delete(Integer id){
+
+    Optional<TeamEntity> entity = repository.findById(id);
+
+    if (entity.isEmpty()){
+      throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+    }
+
+    repository.delete(entity.get());
+  }
+
+  public TeamDto getById(Integer id){
+
+    Optional<TeamEntity> entity = repository.findById(id);
+
+    if(entity.isEmpty()){
+      throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+    }
+
+    return mapper.map(entity.get(), TeamDto.class);
+  }
+
+  public List<TeamDto> getAll() {
+
+    return this.repository.findAll()
+        .stream()
+        .map(entity -> mapper.map(entity, TeamDto.class))
+        .collect(Collectors.toList());
+  }
 }

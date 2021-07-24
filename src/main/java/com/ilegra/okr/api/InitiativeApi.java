@@ -1,10 +1,10 @@
 package com.ilegra.okr.api;
 
 
-import com.ilegra.okr.dto.TeamDto;
+import com.ilegra.okr.dto.InitiativeDto;
 import com.ilegra.okr.model.ErrorMessageModel;
-import com.ilegra.okr.model.TeamModel;
-import com.ilegra.okr.service.TeamService;
+import com.ilegra.okr.model.InitiativeModel;
+import com.ilegra.okr.service.InitiativeService;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
@@ -22,26 +22,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/v1/teams")
-public class TeamApi {
+@RequestMapping("/v1/initiative")
+public class InitiativeApi {
 
   @Autowired
-  private TeamService service;
+  private InitiativeService service;
 
   @Autowired
   private ModelMapper mapper;
 
   @PostMapping
-  public ResponseEntity<TeamModel> save(@RequestBody TeamModel model) {
-    return new ResponseEntity<>(mapper.map(this.service.save(model), TeamModel.class),
+  public ResponseEntity<InitiativeModel> save(@RequestBody InitiativeModel model) {
+    return new ResponseEntity<>(mapper.map(this.service.save(model), InitiativeModel.class),
         HttpStatus.CREATED);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<TeamModel> update(
-      @RequestBody TeamModel model,
+  public ResponseEntity<InitiativeModel> update(
+      @RequestBody InitiativeModel model,
       @PathVariable("id") Integer id) {
-    return new ResponseEntity<>(mapper.map(this.service.update(model, id), TeamModel.class),
+    return new ResponseEntity<>(mapper.map(this.service.update(model, id), InitiativeModel.class),
         HttpStatus.CREATED);
   }
 
@@ -52,24 +52,25 @@ public class TeamApi {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<TeamModel> getById(@PathVariable("id") Integer id) {
+  public ResponseEntity<InitiativeModel> getById(@PathVariable("id") Integer id) {
 
-    TeamDto dto = this.service.getById(id);
+    InitiativeDto dto = this.service.getById(id);
 
-    return new ResponseEntity<>(mapper.map(dto, TeamModel.class),
+    return new ResponseEntity<>(mapper.map(dto, InitiativeModel.class),
         HttpStatus.OK);
   }
 
   @GetMapping
-  public ResponseEntity<List<TeamModel>> getAll() {
-    List<TeamDto> teams = this.service.getAll();
+  public ResponseEntity<List<InitiativeModel>> getAll() {
 
-    if (teams.isEmpty()) {
+    List<InitiativeDto> initiatives = this.service.getAll();
+
+    if (initiatives.isEmpty()) {
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    return new ResponseEntity<>(teams.stream()
-        .map(entity -> mapper.map(entity, TeamModel.class))
+    return new ResponseEntity<>(initiatives.stream()
+        .map(dto -> mapper.map(dto, InitiativeModel.class))
         .collect(Collectors.toList()),
         HttpStatus.OK);
   }

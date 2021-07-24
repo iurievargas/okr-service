@@ -1,5 +1,10 @@
 package com.ilegra.okr.entity;
 
+import java.util.Set;
+import javax.persistence.CascadeType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.OneToMany;
 import lombok.*;
 
 import javax.persistence.Column;
@@ -13,9 +18,13 @@ import javax.persistence.Table;
 public class TeamEntity {
 
 	@Id
-	@Column(name = "id")
-	private Integer teamId;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "team_id")
+	private Integer id;
 
 	@Column(name = "name")
 	private String teamName;
+
+	@OneToMany(mappedBy = "team", orphanRemoval = true, cascade = CascadeType.ALL)
+	private Set<KeyResultEntity> keyResults;
 }

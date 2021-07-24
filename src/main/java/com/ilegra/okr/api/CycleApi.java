@@ -1,10 +1,10 @@
 package com.ilegra.okr.api;
 
 
-import com.ilegra.okr.dto.TeamDto;
+import com.ilegra.okr.dto.CycleDto;
+import com.ilegra.okr.model.CycleModel;
 import com.ilegra.okr.model.ErrorMessageModel;
-import com.ilegra.okr.model.TeamModel;
-import com.ilegra.okr.service.TeamService;
+import com.ilegra.okr.service.CycleService;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
@@ -22,26 +22,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/v1/teams")
-public class TeamApi {
+@RequestMapping("/v1/cycle")
+public class CycleApi {
 
   @Autowired
-  private TeamService service;
+  private CycleService service;
 
   @Autowired
   private ModelMapper mapper;
 
   @PostMapping
-  public ResponseEntity<TeamModel> save(@RequestBody TeamModel model) {
-    return new ResponseEntity<>(mapper.map(this.service.save(model), TeamModel.class),
+  public ResponseEntity<CycleModel> save(@RequestBody CycleModel model) {
+    return new ResponseEntity<>(mapper.map(this.service.save(model), CycleModel.class),
         HttpStatus.CREATED);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<TeamModel> update(
-      @RequestBody TeamModel model,
+  public ResponseEntity<CycleModel> update(
+      @RequestBody CycleModel model,
       @PathVariable("id") Integer id) {
-    return new ResponseEntity<>(mapper.map(this.service.update(model, id), TeamModel.class),
+    return new ResponseEntity<>(mapper.map(this.service.update(model, id), CycleModel.class),
         HttpStatus.CREATED);
   }
 
@@ -52,24 +52,24 @@ public class TeamApi {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<TeamModel> getById(@PathVariable("id") Integer id) {
+  public ResponseEntity<CycleModel> getById(@PathVariable("id") Integer id) {
+    CycleDto dto = this.service.getById(id);
 
-    TeamDto dto = this.service.getById(id);
-
-    return new ResponseEntity<>(mapper.map(dto, TeamModel.class),
+    return new ResponseEntity<>(mapper.map(dto, CycleModel.class),
         HttpStatus.OK);
   }
 
   @GetMapping
-  public ResponseEntity<List<TeamModel>> getAll() {
-    List<TeamDto> teams = this.service.getAll();
+  public ResponseEntity<List<CycleModel>> getAll() {
 
-    if (teams.isEmpty()) {
+    List<CycleDto> cycles = this.service.getAll();
+
+    if (cycles.isEmpty()) {
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    return new ResponseEntity<>(teams.stream()
-        .map(entity -> mapper.map(entity, TeamModel.class))
+    return new ResponseEntity<>(cycles.stream()
+        .map(dto -> mapper.map(dto, CycleModel.class))
         .collect(Collectors.toList()),
         HttpStatus.OK);
   }
