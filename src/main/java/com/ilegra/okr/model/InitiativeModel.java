@@ -12,4 +12,6 @@ public class InitiativeModel {
   private String description;
 
   private String status;
+
+  private Integer keyResultId;
 }

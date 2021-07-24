@@ -14,4 +14,8 @@ public class KeyResultModel {
   private Integer target;
 
   private Integer result;
+
+  private Integer objectiveId;
+
+  private Integer teamId;
 }

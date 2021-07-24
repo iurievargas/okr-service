@@ -13,4 +13,6 @@ public class ObjectiveModel {
   private LocalDateTime createdDate;
 
   private String type;
+
+  private Integer cycleId;
 }
