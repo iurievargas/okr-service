@@ -1,9 +1,11 @@
 package com.ilegra.okr.api;
 
 
+import com.ilegra.okr.dto.KeyResultDto;
 import com.ilegra.okr.dto.TeamDto;
-import com.ilegra.okr.model.ErrorMessageModel;
+import com.ilegra.okr.model.KeyResultModel;
 import com.ilegra.okr.model.TeamModel;
+import com.ilegra.okr.service.KeyResultService;
 import com.ilegra.okr.service.TeamService;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +28,9 @@ public class TeamApi {
 
   @Autowired
   private TeamService service;
+
+  @Autowired
+  private KeyResultService keyResultService;
 
   @Autowired
   private ModelMapper mapper;
@@ -74,19 +78,18 @@ public class TeamApi {
         HttpStatus.OK);
   }
 
-  @ExceptionHandler(value = {IllegalArgumentException.class})
-  public ResponseEntity<ErrorMessageModel> validateNotFound(IllegalArgumentException ex) {
+  @GetMapping("/{id}/key-results")
+  public ResponseEntity<List<KeyResultModel>> getAllKeyResultsById(@PathVariable("id") Integer id) {
 
-    ErrorMessageModel errorMessageModel = new ErrorMessageModel();
-    errorMessageModel.setCode(HttpStatus.NO_CONTENT);
-    errorMessageModel.setMessage(ex.getMessage());
+    List<KeyResultDto> keyResults = this.keyResultService.getAllByObjectiveId(id);
 
-    return new ResponseEntity<>(errorMessageModel, HttpStatus.NO_CONTENT);
+    if (keyResults.isEmpty()) {
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    return new ResponseEntity<>(keyResults.stream()
+        .map(dto -> mapper.map(dto, KeyResultModel.class))
+        .collect(Collectors.toList()),
+        HttpStatus.OK);
   }
-
-  @ExceptionHandler(value = {Exception.class})
-  public ResponseEntity<String> validateInternalServerError() {
-    return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-  }
-
 }

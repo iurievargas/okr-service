@@ -56,11 +56,11 @@ public class KeyResultService {
     repository.delete(entity.get());
   }
 
-  public KeyResultDto getById(Integer id){
+  public KeyResultDto getById(Integer id) {
 
     Optional<KeyResultEntity> entity = repository.findById(id);
 
-    if(entity.isEmpty()){
+    if (entity.isEmpty()) {
       throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
     }
 
@@ -74,4 +74,13 @@ public class KeyResultService {
         .map(entity -> mapper.map(entity, KeyResultDto.class))
         .collect(Collectors.toList());
   }
+
+  public List<KeyResultDto> getAllByObjectiveId(Integer objectiveId) {
+
+    return this.repository.findAllByObjectiveId(objectiveId)
+        .stream()
+        .map(entity -> mapper.map(entity, KeyResultDto.class))
+        .collect(Collectors.toList());
+  }
+
 }

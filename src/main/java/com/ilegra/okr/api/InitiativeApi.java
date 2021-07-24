@@ -74,20 +74,4 @@ public class InitiativeApi {
         .collect(Collectors.toList()),
         HttpStatus.OK);
   }
-
-  @ExceptionHandler(value = {IllegalArgumentException.class})
-  public ResponseEntity<ErrorMessageModel> validateNotFound(IllegalArgumentException ex) {
-
-    ErrorMessageModel errorMessageModel = new ErrorMessageModel();
-    errorMessageModel.setCode(HttpStatus.NO_CONTENT);
-    errorMessageModel.setMessage(ex.getMessage());
-
-    return new ResponseEntity<>(errorMessageModel, HttpStatus.NO_CONTENT);
-  }
-
-  @ExceptionHandler(value = {Exception.class})
-  public ResponseEntity<String> validateInternalServerError() {
-    return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-  }
-
 }

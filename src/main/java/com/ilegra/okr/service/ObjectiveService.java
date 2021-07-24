@@ -1,12 +1,10 @@
 package com.ilegra.okr.service;
 
 import com.ilegra.okr.dto.ObjectiveDto;
-import com.ilegra.okr.dto.ObjectiveFilterDto;
 import com.ilegra.okr.entity.ObjectiveEntity;
 import com.ilegra.okr.model.ObjectiveModel;
 import com.ilegra.okr.repository.ObjectiveRepository;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
@@ -66,18 +64,18 @@ public class ObjectiveService {
     return mapper.map(entity.get(), ObjectiveDto.class);
   }
 
-  public List<ObjectiveDto> getAll(ObjectiveFilterDto filterDto) {
-
-    if (Objects.nonNull(filterDto.getCycleId())) {
-      return this.repository.findAllByCycleId(filterDto.getCycleId())
-          .stream()
-          .map(entity -> mapper.map(entity, ObjectiveDto.class))
-          .collect(Collectors.toList());
-    }
-
+  public List<ObjectiveDto> getAll() {
     return this.repository.findAll()
         .stream()
         .map(entity -> mapper.map(entity, ObjectiveDto.class))
         .collect(Collectors.toList());
   }
+
+  public List<ObjectiveDto> getAllByCycleId(Integer cycleId) {
+    return repository.findAllByCycleId(cycleId)
+        .stream()
+        .map(entity -> mapper.map(entity, ObjectiveDto.class))
+        .collect(Collectors.toList());
+  }
+
 }

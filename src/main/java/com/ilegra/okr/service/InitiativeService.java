@@ -74,4 +74,12 @@ public class InitiativeService {
         .map(entity -> mapper.map(entity, InitiativeDto.class))
         .collect(Collectors.toList());
   }
+
+  public List<InitiativeDto> getAllByKeyResultId(Integer keyResultId) {
+
+    return this.repository.findAllByKeyResultId(keyResultId)
+        .stream()
+        .map(entity -> mapper.map(entity, InitiativeDto.class))
+        .collect(Collectors.toList());
+  }
 }

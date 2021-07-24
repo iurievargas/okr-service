@@ -2,9 +2,12 @@ package com.ilegra.okr.api;
 
 
 import com.ilegra.okr.dto.CycleDto;
+import com.ilegra.okr.dto.ObjectiveDto;
 import com.ilegra.okr.model.CycleModel;
 import com.ilegra.okr.model.ErrorMessageModel;
+import com.ilegra.okr.model.ObjectiveModel;
 import com.ilegra.okr.service.CycleService;
+import com.ilegra.okr.service.ObjectiveService;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
@@ -19,7 +22,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.WebRequest;
 
 @RestController
 @RequestMapping("/v1/cycle")
@@ -27,6 +33,9 @@ public class CycleApi {
 
   @Autowired
   private CycleService service;
+
+  @Autowired
+  private ObjectiveService objectiveService;
 
   @Autowired
   private ModelMapper mapper;
@@ -74,19 +83,18 @@ public class CycleApi {
         HttpStatus.OK);
   }
 
-  @ExceptionHandler(value = {IllegalArgumentException.class})
-  public ResponseEntity<ErrorMessageModel> validateNotFound(IllegalArgumentException ex) {
+  @GetMapping("/{id}/objectives")
+  public ResponseEntity<List<ObjectiveModel>> getAllObjectivesById(@PathVariable("id") Integer id) {
 
-    ErrorMessageModel errorMessageModel = new ErrorMessageModel();
-    errorMessageModel.setCode(HttpStatus.NO_CONTENT);
-    errorMessageModel.setMessage(ex.getMessage());
+    List<ObjectiveDto> objectives = this.objectiveService.getAllByCycleId(id);
 
-    return new ResponseEntity<>(errorMessageModel, HttpStatus.NO_CONTENT);
+    if (objectives.isEmpty()) {
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    return new ResponseEntity<>(objectives.stream()
+        .map(dto -> mapper.map(dto, ObjectiveModel.class))
+        .collect(Collectors.toList()),
+        HttpStatus.OK);
   }
-
-  @ExceptionHandler(value = {Exception.class})
-  public ResponseEntity<String> validateInternalServerError() {
-    return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-  }
-
 }
