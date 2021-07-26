@@ -74,4 +74,13 @@ public class ObjectiveApi {
         .collect(Collectors.toList()),
         HttpStatus.OK);
   }
+
+  @GetMapping("/{objectiveFatherId}/objectives")
+  public ResponseEntity<List<ObjectiveModel>> getAllObjectivesByObjectiveFatherId(
+      @PathVariable("objectiveFatherId") Integer objectiveFatherId) {
+    return new ResponseEntity<>(this.service.getAllByObjectiveFatherId(objectiveFatherId).stream()
+        .map(dto -> mapper.map(dto, ObjectiveModel.class))
+        .collect(Collectors.toList()),
+        HttpStatus.OK);
+  }
 }

@@ -8,4 +8,6 @@ public interface ObjectiveRepository extends JpaRepository<ObjectiveEntity, Inte
 
   List<ObjectiveEntity> findAllByCycleId(Integer cycleId);
 
+  List<ObjectiveEntity> findAllByObjectiveFatherId(Integer objectiveFatherId);
+
 }

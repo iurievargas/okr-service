@@ -15,4 +15,6 @@ public class ObjectiveModel {
   private String type;
 
   private Integer cycleId;
+
+  private Integer objectiveFatherId;
 }

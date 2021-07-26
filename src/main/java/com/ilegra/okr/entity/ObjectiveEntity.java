@@ -30,4 +30,7 @@ public class ObjectiveEntity {
 
   @Column(name = "cycle_id")
   private Integer cycleId;
+
+  @Column(name = "objective_father_id")
+  private Integer objectiveFatherId;
 }

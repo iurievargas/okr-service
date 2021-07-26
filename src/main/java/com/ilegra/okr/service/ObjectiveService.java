@@ -78,4 +78,11 @@ public class ObjectiveService {
         .collect(Collectors.toList());
   }
 
+  public List<ObjectiveDto> getAllByObjectiveFatherId(Integer objectiveFatherId) {
+    return repository.findAllByObjectiveFatherId(objectiveFatherId)
+        .stream()
+        .map(entity -> mapper.map(entity, ObjectiveDto.class))
+        .collect(Collectors.toList());
+  }
+
 }

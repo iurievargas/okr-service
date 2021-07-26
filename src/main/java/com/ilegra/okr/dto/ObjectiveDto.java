@@ -15,4 +15,6 @@ public class ObjectiveDto {
   private String type;
 
   private Integer cycleId;
+
+  private Integer objectiveFatherId;
 }
