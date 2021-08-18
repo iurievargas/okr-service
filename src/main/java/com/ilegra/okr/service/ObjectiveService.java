@@ -2,8 +2,10 @@ package com.ilegra.okr.service;
 
 import com.ilegra.okr.dto.ObjectiveDto;
 import com.ilegra.okr.entity.ObjectiveEntity;
-import com.ilegra.okr.model.ObjectiveModel;
+import com.ilegra.okr.model.response.ObjectiveResponseModel;
 import com.ilegra.okr.repository.ObjectiveRepository;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,12 +24,15 @@ public class ObjectiveService {
   @Autowired
   private ModelMapper mapper;
 
-  public ObjectiveDto save(ObjectiveModel model) {
+  public ObjectiveDto insert(ObjectiveDto dto) {
+
+  	dto.setCreatedDate(LocalDateTime.now());
+
     return mapper
-        .map(repository.save(mapper.map(model, ObjectiveEntity.class)), ObjectiveDto.class);
+        .map(repository.save(mapper.map(dto, ObjectiveEntity.class)), ObjectiveDto.class);
   }
 
-  public ObjectiveDto update(ObjectiveModel model, Integer id) {
+  public ObjectiveDto update(ObjectiveDto dto, Integer id) {
 
     Optional<ObjectiveEntity> entity = repository.findById(id);
 
@@ -35,7 +40,7 @@ public class ObjectiveService {
       throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
     }
 
-    ObjectiveEntity objectiveEntity = mapper.map(model, ObjectiveEntity.class);
+    ObjectiveEntity objectiveEntity = mapper.map(dto, ObjectiveEntity.class);
     objectiveEntity.setId(id);
 
     return mapper

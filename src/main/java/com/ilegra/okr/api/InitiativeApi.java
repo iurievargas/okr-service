@@ -1,7 +1,10 @@
 package com.ilegra.okr.api;
 
 
-import com.ilegra.okr.model.InitiativeModel;
+import com.ilegra.okr.dto.InitiativeDto;
+import com.ilegra.okr.entity.InitiativeEntity;
+import com.ilegra.okr.model.request.InitiativeRequestModel;
+import com.ilegra.okr.model.response.InitiativeResponseModel;
 import com.ilegra.okr.service.InitiativeService;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,46 +22,57 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/v1/initiative")
+@RequestMapping("/v1/initiatives")
 public class InitiativeApi {
 
-  @Autowired
-  private InitiativeService service;
+	@Autowired
+	private InitiativeService initiativeService;
 
-  @Autowired
-  private ModelMapper mapper;
+	@Autowired
+	private ModelMapper mapper;
 
-  @PostMapping
-  public ResponseEntity<InitiativeModel> save(@RequestBody InitiativeModel model) {
-    return new ResponseEntity<>(mapper.map(this.service.save(model), InitiativeModel.class),
-        HttpStatus.CREATED);
-  }
+	@PostMapping
+	public ResponseEntity<InitiativeResponseModel> insert(@RequestBody InitiativeRequestModel model)
+	{
+		var initiativeDto = this.initiativeService.save(mapper.map(model, InitiativeDto.class));
+		var response = mapper.map(initiativeDto, InitiativeResponseModel.class);
 
-  @PutMapping("/{id}")
-  public ResponseEntity<InitiativeModel> update(
-      @RequestBody InitiativeModel model,
-      @PathVariable("id") Integer id) {
-    return new ResponseEntity<>(mapper.map(this.service.update(model, id), InitiativeModel.class),
-        HttpStatus.CREATED);
-  }
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	}
 
-  @DeleteMapping("/{id}")
-  public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
-    this.service.delete(id);
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-  }
+	@PutMapping("/{id}")
+	public ResponseEntity<InitiativeResponseModel> update(@RequestBody InitiativeResponseModel model,
+														  @PathVariable("id") Integer id) {
 
-  @GetMapping("/{id}")
-  public ResponseEntity<InitiativeModel> getById(@PathVariable("id") Integer id) {
-    return new ResponseEntity<>(mapper.map(this.service.getById(id), InitiativeModel.class),
-        HttpStatus.OK);
-  }
+		var initiativeDto = this.initiativeService.update(mapper.map(model, InitiativeDto.class), id);
+		var response = mapper.map(initiativeDto, InitiativeResponseModel.class);
 
-  @GetMapping
-  public ResponseEntity<List<InitiativeModel>> getAll() {
-    return new ResponseEntity<>(this.service.getAll().stream()
-        .map(dto -> mapper.map(dto, InitiativeModel.class))
-        .collect(Collectors.toList()),
-        HttpStatus.OK);
-  }
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
+
+		this.initiativeService.delete(id);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<InitiativeResponseModel> getById(@PathVariable("id") Integer id) {
+
+		var response = mapper.map(this.initiativeService.getById(id), InitiativeResponseModel.class);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	@GetMapping
+	public ResponseEntity<List<InitiativeResponseModel>> getAll() {
+
+		var response = this.initiativeService
+				.getAll()
+				.stream()
+				.map(dto -> mapper.map(dto, InitiativeResponseModel.class))
+				.collect(Collectors.toList());
+
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }

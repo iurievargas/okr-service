@@ -2,7 +2,7 @@ package com.ilegra.okr.service;
 
 import com.ilegra.okr.dto.TeamDto;
 import com.ilegra.okr.entity.TeamEntity;
-import com.ilegra.okr.model.TeamModel;
+import com.ilegra.okr.model.response.TeamResponseModel;
 import com.ilegra.okr.repository.TeamRepository;
 import java.util.List;
 import java.util.Optional;
@@ -22,12 +22,12 @@ public class TeamService {
   @Autowired
   private ModelMapper mapper;
 
-  public TeamDto save(TeamModel model) {
+  public TeamDto insert(TeamDto dto) {
     return mapper
-        .map(repository.save(mapper.map(model, TeamEntity.class)), TeamDto.class);
+        .map(repository.save(mapper.map(dto, TeamEntity.class)), TeamDto.class);
   }
 
-  public TeamDto update(TeamModel model, Integer id) {
+  public TeamDto update(TeamDto dto, Integer id) {
 
     Optional<TeamEntity> entity = repository.findById(id);
 
@@ -35,7 +35,7 @@ public class TeamService {
       throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
     }
 
-    TeamEntity teamEntity = mapper.map(model, TeamEntity.class);
+    TeamEntity teamEntity = mapper.map(dto, TeamEntity.class);
     teamEntity.setId(id);
 
     return mapper

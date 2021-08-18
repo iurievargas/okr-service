@@ -1,11 +1,10 @@
-package com.ilegra.okr.dto;
+package com.ilegra.okr.model.request;
 
 import lombok.Data;
 
 @Data
-public class KeyResultDto {
+public class KeyResultRequestModel {
 
-  private Integer id;
   private String description;
   private Integer baseline;
   private Integer target;

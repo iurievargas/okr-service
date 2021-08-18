@@ -1,9 +1,9 @@
-package com.ilegra.okr.dto;
+package com.ilegra.okr.model.response;
 
 import lombok.Data;
 
 @Data
-public class InitiativeDto {
+public class InitiativeResponseModel {
 
   private Integer id;
   private String title;

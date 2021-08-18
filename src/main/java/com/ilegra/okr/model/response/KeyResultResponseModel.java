@@ -1,21 +1,15 @@
-package com.ilegra.okr.model;
+package com.ilegra.okr.model.response;
 
 import lombok.Data;
 
 @Data
-public class KeyResultModel {
+public class KeyResultResponseModel {
 
   private Integer id;
-
   private String description;
-
   private Integer baseline;
-
   private Integer target;
-
   private Integer result;
-
   private Integer objectiveId;
-
   private Integer teamId;
 }

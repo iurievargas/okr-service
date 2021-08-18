@@ -1,12 +1,11 @@
-package com.ilegra.okr.dto;
+package com.ilegra.okr.model.request;
 
 import java.time.LocalDate;
 import lombok.Data;
 
 @Data
-public class CycleDto {
+public class CycleRequestModel {
 
-  private Integer id;
   private String title;
   private LocalDate startDate;
   private LocalDate endDate;

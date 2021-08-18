@@ -1,8 +1,10 @@
 package com.ilegra.okr.api;
 
-
-import com.ilegra.okr.model.KeyResultModel;
-import com.ilegra.okr.model.TeamModel;
+import com.ilegra.okr.dto.TeamDto;
+import com.ilegra.okr.model.request.KeyResultRequestModel;
+import com.ilegra.okr.model.request.TeamRequestModel;
+import com.ilegra.okr.model.response.KeyResultResponseModel;
+import com.ilegra.okr.model.response.TeamResponseModel;
 import com.ilegra.okr.service.KeyResultService;
 import com.ilegra.okr.service.TeamService;
 import java.util.List;
@@ -24,54 +26,57 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/teams")
 public class TeamApi {
 
-  @Autowired
-  private TeamService service;
+	@Autowired
+	private TeamService teamService;
 
-  @Autowired
-  private KeyResultService keyResultService;
+	@Autowired
+	private KeyResultService keyResultService;
 
-  @Autowired
-  private ModelMapper mapper;
+	@Autowired
+	private ModelMapper mapper;
 
-  @PostMapping
-  public ResponseEntity<TeamModel> save(@RequestBody TeamModel model) {
-    return new ResponseEntity<>(mapper.map(this.service.save(model), TeamModel.class),
-        HttpStatus.CREATED);
-  }
+	@PostMapping
+	public ResponseEntity<TeamResponseModel> save(@RequestBody TeamRequestModel model) {
 
-  @PutMapping("/{id}")
-  public ResponseEntity<TeamModel> update(
-      @RequestBody TeamModel model,
-      @PathVariable("id") Integer id) {
-    return new ResponseEntity<>(mapper.map(this.service.update(model, id), TeamModel.class),
-        HttpStatus.CREATED);
-  }
+		var dto = this.teamService.insert(mapper.map(model, TeamDto.class));
+		var response = mapper.map(dto, TeamResponseModel.class);
 
-  @DeleteMapping("/{id}")
-  public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
-    this.service.delete(id);
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-  }
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	}
 
-  @GetMapping("/{id}")
-  public ResponseEntity<TeamModel> getById(@PathVariable("id") Integer id) {
-    return new ResponseEntity<>(mapper.map(this.service.getById(id), TeamModel.class),
-        HttpStatus.OK);
-  }
+	@PutMapping("/{id}")
+	public ResponseEntity<TeamResponseModel> update(@RequestBody TeamRequestModel model,
+													@PathVariable("id") Integer id) {
 
-  @GetMapping
-  public ResponseEntity<List<TeamModel>> getAll() {
-    return new ResponseEntity<>(this.service.getAll().stream()
-        .map(entity -> mapper.map(entity, TeamModel.class))
-        .collect(Collectors.toList()),
-        HttpStatus.OK);
-  }
+		var dto = this.teamService.update(mapper.map(model, TeamDto.class), id);
+		var response = mapper.map(dto, TeamResponseModel.class);
 
-  @GetMapping("/{id}/key-results")
-  public ResponseEntity<List<KeyResultModel>> getAllKeyResultsById(@PathVariable("id") Integer id) {
-    return new ResponseEntity<>(this.keyResultService.getAllByObjectiveId(id).stream()
-        .map(dto -> mapper.map(dto, KeyResultModel.class))
-        .collect(Collectors.toList()),
-        HttpStatus.OK);
-  }
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
+
+		this.teamService.delete(id);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<TeamResponseModel> getById(@PathVariable("id") Integer id) {
+
+		var response = mapper.map(this.teamService.getById(id), TeamResponseModel.class);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	@GetMapping
+	public ResponseEntity<List<TeamResponseModel>> getAll() {
+
+		var response = this.teamService
+				.getAll()
+				.stream()
+				.map(entity -> mapper.map(entity, TeamResponseModel.class))
+				.collect(Collectors.toList());
+
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }

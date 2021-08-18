@@ -1,11 +1,8 @@
 package com.ilegra.okr.service;
 
 import com.ilegra.okr.dto.KeyResultDto;
-import com.ilegra.okr.dto.ObjectiveDto;
 import com.ilegra.okr.entity.KeyResultEntity;
-import com.ilegra.okr.entity.ObjectiveEntity;
-import com.ilegra.okr.model.KeyResultModel;
-import com.ilegra.okr.model.TeamModel;
+import com.ilegra.okr.model.request.KeyResultRequestModel;
 import com.ilegra.okr.repository.KeyResultRepository;
 import java.util.List;
 import java.util.Optional;
@@ -25,12 +22,12 @@ public class KeyResultService {
   @Autowired
   private ModelMapper mapper;
 
-  public KeyResultDto save(KeyResultModel model) {
+  public KeyResultDto insert(KeyResultDto keyResultDto) {
     return mapper
-        .map(repository.save(mapper.map(model, KeyResultEntity.class)), KeyResultDto.class);
+        .map(repository.save(mapper.map(keyResultDto, KeyResultEntity.class)), KeyResultDto.class);
   }
 
-  public KeyResultDto update(KeyResultModel model, Integer id) {
+  public KeyResultDto update(KeyResultDto keyResultDto, Integer id) {
 
     Optional<KeyResultEntity> entity = repository.findById(id);
 
@@ -38,7 +35,7 @@ public class KeyResultService {
       throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
     }
 
-    KeyResultEntity keyResultEntity = mapper.map(model, KeyResultEntity.class);
+    KeyResultEntity keyResultEntity = mapper.map(keyResultDto, KeyResultEntity.class);
     keyResultEntity.setId(id);
 
     return mapper

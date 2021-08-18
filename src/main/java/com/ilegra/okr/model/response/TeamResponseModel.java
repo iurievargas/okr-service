@@ -1,9 +1,9 @@
-package com.ilegra.okr.model;
+package com.ilegra.okr.model.response;
 
 import lombok.Data;
 
 @Data
-public class TeamModel {
+public class TeamResponseModel {
 
 	private Integer teamId;
 	private String teamName;

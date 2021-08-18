@@ -1,11 +1,9 @@
 package com.ilegra.okr.service;
 
-import com.ilegra.okr.dto.CycleDto;
 import com.ilegra.okr.dto.InitiativeDto;
-import com.ilegra.okr.entity.CycleEntity;
 import com.ilegra.okr.entity.InitiativeEntity;
-import com.ilegra.okr.model.InitiativeModel;
-import com.ilegra.okr.model.TeamModel;
+import com.ilegra.okr.model.request.InitiativeRequestModel;
+import com.ilegra.okr.model.response.InitiativeResponseModel;
 import com.ilegra.okr.repository.InitiativeRepository;
 import java.util.List;
 import java.util.Optional;
@@ -25,12 +23,12 @@ public class InitiativeService {
   @Autowired
   private ModelMapper mapper;
 
-  public InitiativeDto save(InitiativeModel model) {
+  public InitiativeDto save(InitiativeDto initiativeDto) {
     return mapper
-        .map(repository.save(mapper.map(model, InitiativeEntity.class)), InitiativeDto.class);
+        .map(repository.save(mapper.map(initiativeDto, InitiativeEntity.class)), InitiativeDto.class);
   }
 
-  public InitiativeDto update(InitiativeModel model, Integer id) {
+  public InitiativeDto update(InitiativeDto initiativeDto, Integer id) {
 
     Optional<InitiativeEntity> entity = repository.findById(id);
 
@@ -38,7 +36,7 @@ public class InitiativeService {
       throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
     }
 
-    InitiativeEntity initiativeEntity = mapper.map(model, InitiativeEntity.class);
+    InitiativeEntity initiativeEntity = mapper.map(initiativeDto, InitiativeEntity.class);
     initiativeEntity.setId(id);
 
     return mapper

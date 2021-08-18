@@ -2,7 +2,7 @@ package com.ilegra.okr.service;
 
 import com.ilegra.okr.dto.CycleDto;
 import com.ilegra.okr.entity.CycleEntity;
-import com.ilegra.okr.model.CycleModel;
+import com.ilegra.okr.model.request.CycleRequestModel;
 import com.ilegra.okr.repository.CycleRepository;
 import java.util.List;
 import java.util.Optional;
@@ -22,12 +22,12 @@ public class CycleService {
   @Autowired
   private ModelMapper mapper;
 
-  public CycleDto save(CycleModel model) {
+  public CycleDto save(CycleDto dto) {
     return mapper
-        .map(repository.save(mapper.map(model, CycleEntity.class)), CycleDto.class);
+        .map(repository.save(mapper.map(dto, CycleEntity.class)), CycleDto.class);
   }
 
-  public CycleDto update(CycleModel model, Integer id) {
+  public CycleDto update(CycleDto dto, Integer id) {
 
     Optional<CycleEntity> entity = repository.findById(id);
 
@@ -35,7 +35,7 @@ public class CycleService {
       throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
     }
 
-    CycleEntity cycleEntity = mapper.map(model, CycleEntity.class);
+    CycleEntity cycleEntity = mapper.map(dto, CycleEntity.class);
     cycleEntity.setId(id);
 
     return mapper
