@@ -6,10 +6,11 @@ import lombok.Data;
 @Data
 public class ObjectiveResponseModel {
 
-  private Integer id;
-  private String title;
-  private LocalDateTime createdDate;
-  private String type;
-  private Integer cycleId;
-  private Integer objectiveFatherId;
+	private Integer id;
+	private String title;
+	private LocalDateTime createdDate;
+	private Double progress;
+	private Integer cycleId;
+	private Integer objectiveFatherId;
+	private Integer teamId;
 }

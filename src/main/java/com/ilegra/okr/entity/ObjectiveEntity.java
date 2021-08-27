@@ -25,12 +25,12 @@ public class ObjectiveEntity {
   @Column(name = "created_date")
   private LocalDateTime createdDate;
 
-  @Column(name = "type")
-  private String type;
-
   @Column(name = "cycle_id")
   private Integer cycleId;
 
   @Column(name = "objective_father_id")
   private Integer objectiveFatherId;
+
+  @Column(name = "team_id")
+  private Integer teamId;
 }

@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ObjectiveRepository extends JpaRepository<ObjectiveEntity, Integer> {
 
-  List<ObjectiveEntity> findAllByCycleId(Integer cycleId);
+  List<ObjectiveEntity> findAllByCycleIdAndObjectiveFatherIdIsNull(Integer cycleId);
 
   List<ObjectiveEntity> findAllByObjectiveFatherId(Integer objectiveFatherId);
 

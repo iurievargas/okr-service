@@ -21,18 +21,22 @@ public class KeyResultEntity {
   @Column(name = "description")
   private String description;
 
+  @Column(name = "labels")
+  private String labels;
+
   @Column(name = "baseline")
-  private Integer baseline;
+  private Double baseline;
 
   @Column(name = "target")
-  private Integer target;
+  private Double target;
 
   @Column(name = "result")
-  private Integer result;
+  private Double result;
 
   @Column(name = "objective_id")
   private Integer objectiveId;
 
   @Column(name = "team_id")
   private Integer teamId;
+
 }

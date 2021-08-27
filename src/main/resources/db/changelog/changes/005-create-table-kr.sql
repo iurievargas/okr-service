@@ -1,9 +1,10 @@
 CREATE TABLE okr.key_result (
     key_result_id INT NOT NULL AUTO_INCREMENT,
     description VARCHAR(200) NULL,
-    baseline INT NULL,
-    target INT NOT NULL,
-    result INT NULL,
+    labels VARCHAR(200) NULL,
+    baseline DECIMAL(10,2) NULL,
+    target DECIMAL(10,2) NOT NULL,
+    result DECIMAL(10,2) NULL,
     objective_id INT NOT NULL,
     team_id INT NOT NULL,
     PRIMARY KEY (key_result_id),

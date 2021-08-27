@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class ObjectiveRequestModel {
 
   private String title;
-  private String type;
   private Integer cycleId;
   private Integer objectiveFatherId;
+  private Integer teamId;
 }

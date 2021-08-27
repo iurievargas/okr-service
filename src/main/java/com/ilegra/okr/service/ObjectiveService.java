@@ -1,93 +1,139 @@
 package com.ilegra.okr.service;
 
+import com.ilegra.okr.dto.KeyResultDto;
 import com.ilegra.okr.dto.ObjectiveDto;
 import com.ilegra.okr.entity.ObjectiveEntity;
-import com.ilegra.okr.model.response.ObjectiveResponseModel;
 import com.ilegra.okr.repository.ObjectiveRepository;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class ObjectiveService {
 
-  private static final String NOT_FOUND_MESSAGE = "There is no objective with this id";
+	private static final String NOT_FOUND_MESSAGE = "There is no objective with this id";
+	private static final Double PROGRESS_LIMIT = 100.00;
 
-  @Autowired
-  private ObjectiveRepository repository;
+	@Autowired
+	private ObjectiveRepository repository;
 
-  @Autowired
-  private ModelMapper mapper;
+	@Autowired
+	private KeyResultService keyResultService;
 
-  public ObjectiveDto insert(ObjectiveDto dto) {
+	@Autowired
+	private ModelMapper mapper;
 
-  	dto.setCreatedDate(LocalDateTime.now());
+	public ObjectiveDto insert(ObjectiveDto dto) {
 
-    return mapper
-        .map(repository.save(mapper.map(dto, ObjectiveEntity.class)), ObjectiveDto.class);
-  }
+		dto.setCreatedDate(LocalDateTime.now());
 
-  public ObjectiveDto update(ObjectiveDto dto, Integer id) {
+		return mapper
+				.map(repository.save(mapper.map(dto, ObjectiveEntity.class)), ObjectiveDto.class);
+	}
 
-    Optional<ObjectiveEntity> entity = repository.findById(id);
+	public ObjectiveDto update(ObjectiveDto dto, Integer id) {
 
-    if (entity.isEmpty()) {
-      throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
-    }
+		Optional<ObjectiveEntity> entity = repository.findById(id);
 
-    ObjectiveEntity objectiveEntity = mapper.map(dto, ObjectiveEntity.class);
-    objectiveEntity.setId(id);
+		if (entity.isEmpty()) {
+			throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+		}
 
-    return mapper
-        .map(repository.save(objectiveEntity), ObjectiveDto.class);
-  }
+		ObjectiveEntity objectiveEntity = mapper.map(dto, ObjectiveEntity.class);
+		objectiveEntity.setId(id);
 
-  public void delete(Integer id) {
+		return mapper
+				.map(repository.save(objectiveEntity), ObjectiveDto.class);
+	}
 
-    Optional<ObjectiveEntity> entity = repository.findById(id);
+	public void delete(Integer id) {
 
-    if (entity.isEmpty()) {
-      throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
-    }
+		Optional<ObjectiveEntity> entity = repository.findById(id);
 
-    repository.delete(entity.get());
-  }
+		if (entity.isEmpty()) {
+			throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+		}
 
-  public ObjectiveDto getById(Integer id) {
+		repository.delete(entity.get());
+	}
 
-    Optional<ObjectiveEntity> entity = repository.findById(id);
+	public ObjectiveDto getById(Integer id) {
 
-    if (entity.isEmpty()) {
-      throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
-    }
+		Optional<ObjectiveEntity> entity = repository.findById(id);
 
-    return mapper.map(entity.get(), ObjectiveDto.class);
-  }
+		if (entity.isEmpty()) {
+			throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+		}
 
-  public List<ObjectiveDto> getAll() {
-    return this.repository.findAll()
-        .stream()
-        .map(entity -> mapper.map(entity, ObjectiveDto.class))
-        .collect(Collectors.toList());
-  }
+		var objectiveDto = mapper.map(entity.get(), ObjectiveDto.class);
 
-  public List<ObjectiveDto> getAllByCycleId(Integer cycleId) {
-    return repository.findAllByCycleId(cycleId)
-        .stream()
-        .map(entity -> mapper.map(entity, ObjectiveDto.class))
-        .collect(Collectors.toList());
-  }
+		return this.calculateProgress(objectiveDto);
+	}
 
-  public List<ObjectiveDto> getAllByObjectiveFatherId(Integer objectiveFatherId) {
-    return repository.findAllByObjectiveFatherId(objectiveFatherId)
-        .stream()
-        .map(entity -> mapper.map(entity, ObjectiveDto.class))
-        .collect(Collectors.toList());
-  }
+	public List<ObjectiveDto> getAll() {
+		return this.repository.findAll()
+				.stream()
+				.map(entity -> mapper.map(entity, ObjectiveDto.class))
+				.map(this::calculateProgress)
+				.collect(Collectors.toList());
+	}
 
+	public List<ObjectiveDto> getAllByCycleId(Integer cycleId) {
+		return repository.findAllByCycleIdAndObjectiveFatherIdIsNull(cycleId)
+				.stream()
+				.map(entity -> mapper.map(entity, ObjectiveDto.class))
+				.map(this::calculateProgress)
+				.collect(Collectors.toList());
+	}
+
+	public List<ObjectiveDto> getAllByObjectiveFatherId(Integer objectiveFatherId) {
+		return repository.findAllByObjectiveFatherId(objectiveFatherId)
+				.stream()
+				.map(entity -> mapper.map(entity, ObjectiveDto.class))
+				.map(this::calculateProgress)
+				.collect(Collectors.toList());
+	}
+
+	private ObjectiveDto calculateProgress(ObjectiveDto objectiveDto) {
+
+		var listOfProgress = this.getAllKeyResultsProgressByObjectiveId(objectiveDto.getId());
+
+		this.getAllByObjectiveFatherId(objectiveDto.getId())
+				.stream()
+				.map(ObjectiveDto::getId)
+				.peek(id -> listOfProgress.addAll(this.getAllKeyResultsProgressByObjectiveId(id)))
+				.collect(Collectors.toList());
+
+		var progress = 0.00;
+		var count = listOfProgress.size();
+		if (count > 0) {
+			var sum = listOfProgress.stream().reduce(0.0, Double::sum);
+			progress = sum / count;
+		}
+
+		objectiveDto.setProgress(progress);
+
+		return objectiveDto;
+	}
+
+	private List<Double> getAllKeyResultsProgressByObjectiveId(Integer objectiveId) {
+
+		return this.keyResultService.getAllByObjectiveId(objectiveId)
+				.stream()
+				.map(KeyResultDto::getProgress)
+				.map(this::prepareProgressToObjectiveProgress)
+				.collect(Collectors.toList());
+	}
+
+	private Double prepareProgressToObjectiveProgress(Double progress) {
+
+		if (progress > PROGRESS_LIMIT)
+			return PROGRESS_LIMIT;
+		return progress;
+	}
 }

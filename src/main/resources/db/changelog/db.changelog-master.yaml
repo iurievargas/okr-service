@@ -18,23 +18,25 @@ databaseChangeLog:
             splitStatements: false
             relativeToChangelogFile: true
   - changeSet:
-      id: 20210724-1602
-      author: iuri.vargas
-      comment: Criando tabela de objetivos do okr
-      changes:
-        - sqlFile:
-            path: changes/003-create-table-objective.sql
-            splitStatements: false
-            relativeToChangelogFile: true
-  - changeSet:
       id: 20210724-1603
       author: iuri.vargas
       comment: Criando tabela de equipes
       changes:
         - sqlFile:
-            path: changes/004-create-table-team.sql
+            path: changes/003-create-table-team.sql
+            splitStatements: false
+            relativeToChangelogFile:
+              true
+  - changeSet:
+      id: 20210724-1602
+      author: iuri.vargas
+      comment: Criando tabela de objetivos do okr
+      changes:
+        - sqlFile:
+            path: changes/004-create-table-objective.sql
             splitStatements: false
             relativeToChangelogFile: true
+
   - changeSet:
       id: 20210724-1604
       author: iuri.vargas
@@ -60,5 +62,51 @@ databaseChangeLog:
       changes:
         - sqlFile:
             path: changes/007-insert-into-team.sql
+            splitStatements: false
+            relativeToChangelogFile: true
+
+  - changeSet:
+      id: 202100820-2000
+      author: iuri.vargas
+      comment: Inserindo valores iniciasis na tabela de ciclo
+      changes:
+        - sqlFile:
+            path: changes/008-insert-into-cycle.sql
+            splitStatements: false
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 202100820-2002
+      author: iuri.vargas
+      comment: Inserindo valores iniciasis na tabela de objetivos
+      changes:
+        - sqlFile:
+            path: changes/009-insert-into-objective.sql
+            splitStatements: false
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 202100820-2003
+      author: iuri.vargas
+      comment: Inserindo valores iniciasis na tabela de objetivos
+      changes:
+        - sqlFile:
+            path: changes/010-insert-into-objective.sql
+            splitStatements: false
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 202100820-2004
+      author: iuri.vargas
+      comment: Inserindo valores iniciasis na tabela de resultados chave
+      changes:
+        - sqlFile:
+            path: changes/011-insert-into-key-result.sql
+            splitStatements: false
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 202100820-2005
+      author: iuri.vargas
+      comment: Inserindo valores iniciasis na tabela de iniciativas
+      changes:
+        - sqlFile:
+            path: changes/012-insert-into-initiative.sql
             splitStatements: false
             relativeToChangelogFile: true
