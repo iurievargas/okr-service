@@ -20,11 +20,18 @@ public class KeyResultService {
 	private KeyResultRepository repository;
 
 	@Autowired
+	private KeyResultUpdateHistoryService keyResultUpdateHistoryService;
+
+	@Autowired
 	private ModelMapper mapper;
 
 	public KeyResultDto insert(KeyResultDto keyResultDto) {
-		return mapper
+		KeyResultDto keyResult = mapper
 				.map(repository.save(mapper.map(keyResultDto, KeyResultEntity.class)), KeyResultDto.class);
+
+		this.keyResultUpdateHistoryService.save(keyResult.getId(), keyResult.getValue());
+
+		return keyResult;
 	}
 
 	public KeyResultDto update(KeyResultDto keyResultDto, Integer id) {
@@ -37,6 +44,8 @@ public class KeyResultService {
 
 		KeyResultEntity keyResultEntity = mapper.map(keyResultDto, KeyResultEntity.class);
 		keyResultEntity.setId(id);
+
+		this.keyResultUpdateHistoryService.save(keyResultEntity.getId(), keyResultEntity.getValue());
 
 		return mapper
 				.map(repository.save(keyResultEntity), KeyResultDto.class);
@@ -90,7 +99,7 @@ public class KeyResultService {
 
 		var baseline = keyResult.getBaseline();
 		var target = keyResult.getTarget();
-		var result = keyResult.getResult();
+		var result = keyResult.getValue();
 
 		var progress = ((result - baseline) / (target - baseline)) * 100;
 

@@ -1,1 +1,18 @@
-INSERT INTO okr.Team (name) VALUES ('Agibank'), ('Thomson Reuters')
+INSERT INTO okr.team (name)
+VALUES  ('Ilegra'),
+		('Outsourcing'),
+		('Outsourcing - Agibank'),
+		('Outsourcing - Orizon'),
+		('Outsourcing - Getnet'),
+		('Outsourcing - Zenvia'),
+		('Outsourcing - RBS'),
+		('Outsourcing - Ailos'),
+		('Outsourcing - John Deere'),
+		('Outsourcing - UX'),
+		('People & Culture'),
+		('OKR Champions'),
+		('Orsegups'),
+		('Duratex'),
+		('Financeiro'),
+		('Comercial'),
+		('Thomson Reuters')

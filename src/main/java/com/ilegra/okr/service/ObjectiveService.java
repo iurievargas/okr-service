@@ -40,12 +40,15 @@ public class ObjectiveService {
 
 		Optional<ObjectiveEntity> entity = repository.findById(id);
 
-		if (entity.isEmpty()) {
+		if (entity.isEmpty())
 			throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
-		}
+		
+		ObjectiveEntity objectiveEntity = entity.get();
 
-		ObjectiveEntity objectiveEntity = mapper.map(dto, ObjectiveEntity.class);
-		objectiveEntity.setId(id);
+		dto.setId(id);
+		dto.setCreatedDate(objectiveEntity.getCreatedDate());
+
+		objectiveEntity = mapper.map(dto, ObjectiveEntity.class);
 
 		return mapper
 				.map(repository.save(objectiveEntity), ObjectiveDto.class);

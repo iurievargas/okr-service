@@ -1,7 +1,8 @@
 package com.ilegra.okr.model.response;
 
-import java.time.LocalDateTime;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Data
 public class ObjectiveResponseModel {
@@ -12,5 +13,5 @@ public class ObjectiveResponseModel {
 	private Double progress;
 	private Integer cycleId;
 	private Integer objectiveFatherId;
-	private Integer teamId;
+	private TeamResponseModel team;
 }

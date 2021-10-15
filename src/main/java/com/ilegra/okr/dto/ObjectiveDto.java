@@ -13,7 +13,6 @@ public class ObjectiveDto {
 	private String type;
 	private Integer cycleId;
 	private Integer objectiveFatherId;
-	private Integer teamId;
+	private TeamDto team;
 	private Double progress;
-
 }

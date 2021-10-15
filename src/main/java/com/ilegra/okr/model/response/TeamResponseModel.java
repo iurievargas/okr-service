@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class TeamResponseModel {
 
-	private Integer teamId;
-	private String teamName;
+	private Integer id;
+	private String name;
 }

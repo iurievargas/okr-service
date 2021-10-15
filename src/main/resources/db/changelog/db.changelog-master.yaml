@@ -36,7 +36,24 @@ databaseChangeLog:
             path: changes/004-create-table-objective.sql
             splitStatements: false
             relativeToChangelogFile: true
-
+  - changeSet:
+      id: 20211006-0054
+      author: iuri.vargas
+      comment: Criando tabela de key result type
+      changes:
+        - sqlFile:
+            path: changes/005.1-create-table-key-result-type.sql
+            splitStatements: false
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 20211006-0056
+      author: iuri.vargas
+      comment: Inserindo valores na tabela key result update
+      changes:
+        - sqlFile:
+            path: changes/005.3-insert-into-key_result_type.sql
+            splitStatements: false
+            relativeToChangelogFile: true
   - changeSet:
       id: 20210724-1604
       author: iuri.vargas
@@ -44,6 +61,15 @@ databaseChangeLog:
       changes:
         - sqlFile:
             path: changes/005-create-table-kr.sql
+            splitStatements: false
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 20211006-0055
+      author: iuri.vargas
+      comment: Criando tabela de key result update
+      changes:
+        - sqlFile:
+            path: changes/006.1-create-table-key-result-update.sql
             splitStatements: false
             relativeToChangelogFile: true
   - changeSet:

@@ -2,24 +2,17 @@ package com.ilegra.okr.api;
 
 
 import com.ilegra.okr.dto.InitiativeDto;
-import com.ilegra.okr.entity.InitiativeEntity;
 import com.ilegra.okr.model.request.InitiativeRequestModel;
 import com.ilegra.okr.model.response.InitiativeResponseModel;
 import com.ilegra.okr.service.InitiativeService;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/v1/initiatives")
@@ -32,8 +25,7 @@ public class InitiativeApi {
 	private ModelMapper mapper;
 
 	@PostMapping
-	public ResponseEntity<InitiativeResponseModel> insert(@RequestBody InitiativeRequestModel model)
-	{
+	public ResponseEntity<InitiativeResponseModel> insert(@RequestBody InitiativeRequestModel model) {
 		var initiativeDto = this.initiativeService.save(mapper.map(model, InitiativeDto.class));
 		var response = mapper.map(initiativeDto, InitiativeResponseModel.class);
 
