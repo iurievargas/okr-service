@@ -2,82 +2,87 @@ package com.ilegra.okr.service;
 
 import com.ilegra.okr.dto.InitiativeDto;
 import com.ilegra.okr.entity.InitiativeEntity;
-import com.ilegra.okr.model.request.InitiativeRequestModel;
-import com.ilegra.okr.model.response.InitiativeResponseModel;
 import com.ilegra.okr.repository.InitiativeRepository;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 public class InitiativeService {
 
-  private static final String NOT_FOUND_MESSAGE = "There is no initiative with this id";
+    private static final String NOT_FOUND_MESSAGE = "There is no initiative with this id";
 
-  @Autowired
-  private InitiativeRepository repository;
+    @Autowired
+    private InitiativeRepository repository;
 
-  @Autowired
-  private ModelMapper mapper;
+    @Autowired
+    private ModelMapper mapper;
 
-  public InitiativeDto save(InitiativeDto initiativeDto) {
-    return mapper
-        .map(repository.save(mapper.map(initiativeDto, InitiativeEntity.class)), InitiativeDto.class);
-  }
-
-  public InitiativeDto update(InitiativeDto initiativeDto, Integer id) {
-
-    Optional<InitiativeEntity> entity = repository.findById(id);
-
-    if (entity.isEmpty()) {
-      throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+    public InitiativeDto insert(InitiativeDto initiativeDto) {
+        initiativeDto.setId(0);
+        return mapper
+                .map(repository.save(mapper.map(initiativeDto, InitiativeEntity.class)), InitiativeDto.class);
     }
 
-    InitiativeEntity initiativeEntity = mapper.map(initiativeDto, InitiativeEntity.class);
-    initiativeEntity.setId(id);
+    public InitiativeDto update(InitiativeDto initiativeDto, Integer id) {
 
-    return mapper
-        .map(repository.save(initiativeEntity), InitiativeDto.class);
-  }
+        Optional<InitiativeEntity> entity = repository.findById(id);
 
-  public void delete(Integer id) {
+        if (entity.isEmpty()) {
+            throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+        }
 
-    Optional<InitiativeEntity> entity = repository.findById(id);
+        InitiativeEntity initiativeEntity = mapper.map(initiativeDto, InitiativeEntity.class);
+        initiativeEntity.setId(id);
 
-    if (entity.isEmpty()) {
-      throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+        return mapper
+                .map(repository.save(initiativeEntity), InitiativeDto.class);
     }
 
-    repository.delete(entity.get());
-  }
+    public void delete(Integer id) {
 
-  public InitiativeDto getById(Integer id){
+        Optional<InitiativeEntity> entity = repository.findById(id);
 
-    Optional<InitiativeEntity> entity = repository.findById(id);
+        if (entity.isEmpty()) {
+            throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+        }
 
-    if(entity.isEmpty()){
-      throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+        repository.delete(entity.get());
     }
 
-    return mapper.map(entity.get(), InitiativeDto.class);
-  }
+    public void deleteAllByKeyResultId(Integer keyResultId) {
 
-  public List<InitiativeDto> getAll() {
+        repository.deleteByKeyResultId(keyResultId);
+    }
 
-    return this.repository.findAll()
-        .stream()
-        .map(entity -> mapper.map(entity, InitiativeDto.class))
-        .collect(Collectors.toList());
-  }
+    public InitiativeDto getById(Integer id) {
 
-  public List<InitiativeDto> getAllByKeyResultId(Integer keyResultId) {
+        Optional<InitiativeEntity> entity = repository.findById(id);
 
-    return this.repository.findAllByKeyResultId(keyResultId)
-        .stream()
-        .map(entity -> mapper.map(entity, InitiativeDto.class))
-        .collect(Collectors.toList());
-  }
+        if (entity.isEmpty()) {
+            throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+        }
+
+        return mapper.map(entity.get(), InitiativeDto.class);
+    }
+
+    public List<InitiativeDto> getAll() {
+
+        return this.repository.findAll()
+                .stream()
+                .map(entity -> mapper.map(entity, InitiativeDto.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<InitiativeDto> getAllByKeyResultId(Integer keyResultId) {
+
+        return this.repository.findAllByKeyResultId(keyResultId)
+                .stream()
+                .map(entity -> mapper.map(entity, InitiativeDto.class))
+                .collect(Collectors.toList());
+    }
 }

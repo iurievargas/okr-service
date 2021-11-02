@@ -14,28 +14,37 @@ import java.util.stream.Collectors;
 @Service
 public class KeyResultUpdateHistoryService {
 
-	@Autowired
-	private KeyResultUpdateHistoryRepository repository;
+    @Autowired
+    private KeyResultUpdateHistoryRepository repository;
 
-	@Autowired
-	private ModelMapper mapper;
+    @Autowired
+    private ModelMapper mapper;
 
-	public KeyResultUpdateHistoryDto save(Integer keyResultId, Double newValue) {
-		KeyResultUpdateHistoryDto dto = new KeyResultUpdateHistoryDto();
+    public void save(Integer keyResultId, Double newValue) {
 
-		dto.setKeyResultId(keyResultId);
-		dto.setNewValue(newValue);
-		dto.setUpdatedDate(LocalDateTime.now());
+        var lastHistory = this.repository.findTopByKeyResultIdOrderByIdDesc(keyResultId);
 
-		return mapper
-				.map(repository.save(mapper.map(dto, KeyResultUpdateHistoryEntity.class)), KeyResultUpdateHistoryDto.class);
-	}
+        if (lastHistory == null || newValue != lastHistory.getNewValue()) {
 
-	public List<KeyResultUpdateHistoryDto> getAllByKeyResultId(Integer keyResultId) {
+            KeyResultUpdateHistoryDto dto = new KeyResultUpdateHistoryDto();
 
-		return this.repository.findAllByKeyResultId(keyResultId)
-				.stream()
-				.map(entity -> mapper.map(entity, KeyResultUpdateHistoryDto.class))
-				.collect(Collectors.toList());
-	}
+            dto.setKeyResultId(keyResultId);
+            dto.setNewValue(newValue);
+            dto.setUpdatedDate(LocalDateTime.now());
+
+            repository.save(mapper.map(dto, KeyResultUpdateHistoryEntity.class));
+        }
+    }
+
+    public void deleteAllByKeyResultId(Integer keyResultId) {
+        this.repository.deleteAllByKeyResultId(keyResultId);
+    }
+
+    public List<KeyResultUpdateHistoryDto> getAllByKeyResultId(Integer keyResultId) {
+
+        return this.repository.findAllByKeyResultId(keyResultId)
+                .stream()
+                .map(entity -> mapper.map(entity, KeyResultUpdateHistoryDto.class))
+                .collect(Collectors.toList());
+    }
 }

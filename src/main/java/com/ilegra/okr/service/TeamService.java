@@ -2,73 +2,73 @@ package com.ilegra.okr.service;
 
 import com.ilegra.okr.dto.TeamDto;
 import com.ilegra.okr.entity.TeamEntity;
-import com.ilegra.okr.model.response.TeamResponseModel;
 import com.ilegra.okr.repository.TeamRepository;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 public class TeamService {
 
-  private static final String NOT_FOUND_MESSAGE = "There is no team with this id";
+    private static final String NOT_FOUND_MESSAGE = "There is no team with this id";
 
-  @Autowired
-  private TeamRepository repository;
+    @Autowired
+    private TeamRepository repository;
 
-  @Autowired
-  private ModelMapper mapper;
+    @Autowired
+    private ModelMapper mapper;
 
-  public TeamDto insert(TeamDto dto) {
-    return mapper
-        .map(repository.save(mapper.map(dto, TeamEntity.class)), TeamDto.class);
-  }
-
-  public TeamDto update(TeamDto dto, Integer id) {
-
-    Optional<TeamEntity> entity = repository.findById(id);
-
-    if (entity.isEmpty()){
-      throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+    public TeamDto insert(TeamDto dto) {
+        return mapper
+                .map(repository.save(mapper.map(dto, TeamEntity.class)), TeamDto.class);
     }
 
-    TeamEntity teamEntity = mapper.map(dto, TeamEntity.class);
-    teamEntity.setId(id);
+    public TeamDto update(TeamDto dto, Integer id) {
 
-    return mapper
-        .map(repository.save(teamEntity), TeamDto.class);
-  }
+        Optional<TeamEntity> entity = repository.findById(id);
 
-  public void delete(Integer id){
+        if (entity.isEmpty()) {
+            throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+        }
 
-    Optional<TeamEntity> entity = repository.findById(id);
+        TeamEntity teamEntity = mapper.map(dto, TeamEntity.class);
+        teamEntity.setId(id);
 
-    if (entity.isEmpty()){
-      throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+        return mapper
+                .map(repository.save(teamEntity), TeamDto.class);
     }
 
-    repository.delete(entity.get());
-  }
+    public void delete(Integer id) {
 
-  public TeamDto getById(Integer id){
+        Optional<TeamEntity> entity = repository.findById(id);
 
-    Optional<TeamEntity> entity = repository.findById(id);
+        if (entity.isEmpty()) {
+            throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+        }
 
-    if(entity.isEmpty()){
-      throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+        repository.delete(entity.get());
     }
 
-    return mapper.map(entity.get(), TeamDto.class);
-  }
+    public TeamDto getById(Integer id) {
 
-  public List<TeamDto> getAll() {
+        Optional<TeamEntity> entity = repository.findById(id);
 
-    return this.repository.findAll()
-        .stream()
-        .map(entity -> mapper.map(entity, TeamDto.class))
-        .collect(Collectors.toList());
-  }
+        if (entity.isEmpty()) {
+            throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+        }
+
+        return mapper.map(entity.get(), TeamDto.class);
+    }
+
+    public List<TeamDto> getAll() {
+
+        return this.repository.findAllOrderByNameAscending()
+                .stream()
+                .map(entity -> mapper.map(entity, TeamDto.class))
+                .collect(Collectors.toList());
+    }
 }

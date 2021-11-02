@@ -1,6 +1,7 @@
 CREATE TABLE okr.key_result (
     key_result_id INT NOT NULL AUTO_INCREMENT,
     description VARCHAR(200) NULL,
+    annotations VARCHAR(1000) NULL,
     labels VARCHAR(200) NULL,
     baseline DECIMAL(10,2) NULL,
     target DECIMAL(10,2) NOT NULL,

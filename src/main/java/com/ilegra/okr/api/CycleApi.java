@@ -9,6 +9,7 @@ import com.ilegra.okr.service.CycleService;
 import com.ilegra.okr.service.ObjectiveService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,67 +21,89 @@ import java.util.stream.Collectors;
 @RequestMapping("/v1/cycles")
 public class CycleApi {
 
-	@Autowired
-	private CycleService cycleService;
+    @Value("${AppSecret}")
+    private String correctAppSecret;
 
-	@Autowired
-	private ObjectiveService objectiveService;
+    @Autowired
+    private CycleService cycleService;
 
-	@Autowired
-	private ModelMapper mapper;
+    @Autowired
+    private ObjectiveService objectiveService;
 
-	@PostMapping
-	public ResponseEntity<CycleResponseModel> save(@RequestBody CycleRequestModel model) {
+    @Autowired
+    private ModelMapper mapper;
 
-		var dto = this.cycleService.save(mapper.map(model, CycleDto.class));
-		var response = mapper.map(dto, CycleResponseModel.class);
+    @PostMapping
+    public ResponseEntity<CycleResponseModel> save(@RequestBody CycleRequestModel model,
+                                                   @RequestHeader String appSecret) {
 
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
-	}
+        if (appSecret == null || !appSecret.equals(correctAppSecret))
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
-	@PutMapping("/{id}")
-	public ResponseEntity<CycleResponseModel> update(@RequestBody CycleRequestModel model,
-													 @PathVariable("id") Integer id) {
+        var dto = this.cycleService.insert(mapper.map(model, CycleDto.class));
+        var response = mapper.map(dto, CycleResponseModel.class);
 
-		var dto = this.cycleService.update(mapper.map(model, CycleDto.class), id);
-		var response = mapper.map(dto, CycleResponseModel.class);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
 
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
-	}
+    @PutMapping("/{id}")
+    public ResponseEntity<CycleResponseModel> update(@RequestBody CycleRequestModel model,
+                                                     @PathVariable("id") Integer id,
+                                                     @RequestHeader String appSecret) {
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
+        if (appSecret == null || !appSecret.equals(correctAppSecret))
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
-		this.cycleService.delete(id);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-	}
+        var dto = this.cycleService.update(mapper.map(model, CycleDto.class), id);
+        var response = mapper.map(dto, CycleResponseModel.class);
 
-	@GetMapping("/{id}")
-	public ResponseEntity<CycleResponseModel> getById(@PathVariable("id") Integer id) {
-		return new ResponseEntity<>(mapper.map(this.cycleService.getById(id), CycleResponseModel.class),
-				HttpStatus.OK);
-	}
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
 
-	@GetMapping
-	public ResponseEntity<List<CycleResponseModel>> getAll() {
-		var response = this.cycleService
-				.getAll()
-				.stream()
-				.map(dto -> mapper.map(dto, CycleResponseModel.class))
-				.collect(Collectors.toList());
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") Integer id, @RequestHeader String appSecret) {
 
-		return new ResponseEntity<>(response, HttpStatus.OK);
-	}
+        if (appSecret == null || !appSecret.equals(correctAppSecret))
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
-	@GetMapping("/{id}/objectives")
-	public ResponseEntity<List<ObjectiveResponseModel>> getAllObjectivesById(@PathVariable("id") Integer id) {
+        this.cycleService.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
-		var response = this.objectiveService
-				.getAllByCycleId(id)
-				.stream()
-				.map(dto -> mapper.map(dto, ObjectiveResponseModel.class))
-				.collect(Collectors.toList());
+    @GetMapping("/{id}")
+    public ResponseEntity<CycleResponseModel> getById(@PathVariable("id") Integer id, @RequestHeader String appSecret) {
+        return new ResponseEntity<>(mapper.map(this.cycleService.getById(id), CycleResponseModel.class),
+                HttpStatus.OK);
+    }
 
-		return new ResponseEntity<>(response, HttpStatus.OK);
-	}
+    @GetMapping
+    public ResponseEntity<List<CycleResponseModel>> getAll(@RequestHeader String appSecret) {
+
+        if (appSecret == null || !appSecret.equals(correctAppSecret))
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+
+        var response = this.cycleService
+                .getAll()
+                .stream()
+                .map(dto -> mapper.map(dto, CycleResponseModel.class))
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/objectives")
+    public ResponseEntity<List<ObjectiveResponseModel>> getAllObjectivesById(@PathVariable("id") Integer id, @RequestHeader String appSecret) {
+
+        if (appSecret == null || !appSecret.equals(correctAppSecret))
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+
+
+        var response = this.objectiveService
+                .getAllByCycleId(id)
+                .stream()
+                .map(dto -> mapper.map(dto, ObjectiveResponseModel.class))
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

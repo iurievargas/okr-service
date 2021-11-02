@@ -2,6 +2,7 @@ CREATE TABLE okr.objective
 (
     objective_id INT NOT NULL AUTO_INCREMENT,
     title VARCHAR(200) NOT NULL,
+    annotations VARCHAR(1000) NULL,
     created_date DATETIME NOT NULL,
     cycle_id INT NOT NULL,
     objective_father_id INT,

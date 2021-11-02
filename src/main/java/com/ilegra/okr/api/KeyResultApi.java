@@ -11,6 +11,7 @@ import com.ilegra.okr.service.KeyResultService;
 import com.ilegra.okr.service.KeyResultUpdateHistoryService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/v1/key-results")
 public class KeyResultApi {
+
+	@Value("${AppSecret}")
+	private String correctAppSecret;
 
 	@Autowired
 	private KeyResultService keyResultService;
@@ -35,7 +39,11 @@ public class KeyResultApi {
 	private ModelMapper mapper;
 
 	@PostMapping
-	public ResponseEntity<KeyResultResponseModel> insert(@RequestBody KeyResultRequestModel model) {
+	public ResponseEntity<KeyResultResponseModel> insert(@RequestBody KeyResultRequestModel model,
+														 @RequestHeader String appSecret) {
+
+		if (appSecret == null || !appSecret.equals(correctAppSecret))
+			return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
 		var dto = this.keyResultService.insert(mapper.map(model, KeyResultDto.class));
 		var response = mapper.map(dto, KeyResultResponseModel.class);
@@ -45,7 +53,11 @@ public class KeyResultApi {
 
 	@PutMapping("/{id}")
 	public ResponseEntity<KeyResultResponseModel> update(@RequestBody KeyResultRequestModel model,
-														 @PathVariable("id") Integer id) {
+														 @PathVariable("id") Integer id,
+														 @RequestHeader String appSecret) {
+
+		if (appSecret == null || !appSecret.equals(correctAppSecret))
+			return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
 		var dto = this.keyResultService.update(mapper.map(model, KeyResultDto.class), id);
 		var response = mapper.map(dto, KeyResultResponseModel.class);
@@ -54,21 +66,32 @@ public class KeyResultApi {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
+	public ResponseEntity<Void> delete(@PathVariable("id") Integer id,
+									   @RequestHeader String appSecret) {
+
+		if (appSecret == null || !appSecret.equals(correctAppSecret))
+			return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
 		this.keyResultService.delete(id);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<KeyResultResponseModel> getById(@PathVariable("id") Integer id) {
+	public ResponseEntity<KeyResultResponseModel> getById(@PathVariable("id") Integer id,
+														  @RequestHeader String appSecret) {
+
+		if (appSecret == null || !appSecret.equals(correctAppSecret))
+			return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
 		var response = mapper.map(this.keyResultService.getById(id), KeyResultResponseModel.class);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	@GetMapping
-	public ResponseEntity<List<KeyResultResponseModel>> getAll() {
+	public ResponseEntity<List<KeyResultResponseModel>> getAll(@RequestHeader String appSecret) {
+
+		if (appSecret == null || !appSecret.equals(correctAppSecret))
+			return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
 		var response = this.keyResultService
 				.getAll()
@@ -80,7 +103,11 @@ public class KeyResultApi {
 	}
 
 	@GetMapping("/{id}/initiatives")
-	public ResponseEntity<List<InitiativeResponseModel>> getAllInitiativesById(@PathVariable("id") Integer id) {
+	public ResponseEntity<List<InitiativeResponseModel>> getAllInitiativesById(@PathVariable("id") Integer id,
+																			   @RequestHeader String appSecret) {
+
+		if (appSecret == null || !appSecret.equals(correctAppSecret))
+			return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
 		var response = this.initiativeService
 				.getAllByKeyResultId(id)
@@ -92,7 +119,11 @@ public class KeyResultApi {
 	}
 
 	@GetMapping("/{id}/history")
-	public ResponseEntity<List<KeyResultUpdateHistoryResponseModel>> getKeyResultHistory(@PathVariable("id") Integer id) {
+	public ResponseEntity<List<KeyResultUpdateHistoryResponseModel>> getKeyResultHistory(@PathVariable("id") Integer id,
+																						 @RequestHeader String appSecret) {
+
+		if (appSecret == null || !appSecret.equals(correctAppSecret))
+			return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
 		var response = this.keyResultUpdateHistoryService
 				.getAllByKeyResultId(id)

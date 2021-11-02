@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class TeamRequestModel {
 
-	private String teamName;
+    private String name;
 }

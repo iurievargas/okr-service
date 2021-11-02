@@ -16,127 +16,156 @@ import java.util.stream.Collectors;
 @Service
 public class ObjectiveService {
 
-	private static final String NOT_FOUND_MESSAGE = "There is no objective with this id";
-	private static final Double PROGRESS_LIMIT = 100.00;
+    private static final String NOT_FOUND_MESSAGE = "There is no objective with this id";
+    private static final Double PROGRESS_LIMIT = 100.00;
 
-	@Autowired
-	private ObjectiveRepository repository;
+    @Autowired
+    private ObjectiveRepository repository;
 
-	@Autowired
-	private KeyResultService keyResultService;
+    @Autowired
+    private KeyResultService keyResultService;
 
-	@Autowired
-	private ModelMapper mapper;
+    @Autowired
+    private ModelMapper mapper;
 
-	public ObjectiveDto insert(ObjectiveDto dto) {
+    public ObjectiveDto insert(ObjectiveDto dto) {
 
-		dto.setCreatedDate(LocalDateTime.now());
+        dto.setCreatedDate(LocalDateTime.now());
 
-		return mapper
-				.map(repository.save(mapper.map(dto, ObjectiveEntity.class)), ObjectiveDto.class);
-	}
+        var objectiveDto = mapper
+                .map(repository.save(mapper.map(dto, ObjectiveEntity.class)), ObjectiveDto.class);
 
-	public ObjectiveDto update(ObjectiveDto dto, Integer id) {
+        objectiveDto = this.getById(objectiveDto.getId());
 
-		Optional<ObjectiveEntity> entity = repository.findById(id);
+        return this.calculateProgress(objectiveDto);
+    }
 
-		if (entity.isEmpty())
-			throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
-		
-		ObjectiveEntity objectiveEntity = entity.get();
+    public ObjectiveDto update(ObjectiveDto dto, Integer id) {
 
-		dto.setId(id);
-		dto.setCreatedDate(objectiveEntity.getCreatedDate());
+        Optional<ObjectiveEntity> entity = repository.findById(id);
 
-		objectiveEntity = mapper.map(dto, ObjectiveEntity.class);
+        if (entity.isEmpty())
+            throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
 
-		return mapper
-				.map(repository.save(objectiveEntity), ObjectiveDto.class);
-	}
+        ObjectiveEntity objectiveEntity = entity.get();
 
-	public void delete(Integer id) {
+        dto.setId(id);
+        dto.setCreatedDate(objectiveEntity.getCreatedDate());
 
-		Optional<ObjectiveEntity> entity = repository.findById(id);
+        objectiveEntity = mapper.map(dto, ObjectiveEntity.class);
 
-		if (entity.isEmpty()) {
-			throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
-		}
+        var objectiveDto = mapper
+                .map(repository.save(objectiveEntity), ObjectiveDto.class);
 
-		repository.delete(entity.get());
-	}
+        objectiveDto = this.getById(objectiveDto.getId());
 
-	public ObjectiveDto getById(Integer id) {
+        return this.calculateProgress(objectiveDto);
+    }
 
-		Optional<ObjectiveEntity> entity = repository.findById(id);
+    public void delete(Integer id) {
 
-		if (entity.isEmpty()) {
-			throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
-		}
+        repository.findById(id)
+                .stream()
+                .map(ObjectiveEntity::getId)
+                .peek(keyResultService::deleteAllByObjectiveId)
+                .peek(this::deleteAllByObjectiveFatherId)
+                .peek(repository::deleteById)
+                .collect(Collectors.toList());
+    }
 
-		var objectiveDto = mapper.map(entity.get(), ObjectiveDto.class);
 
-		return this.calculateProgress(objectiveDto);
-	}
+    public void deleteAllByCycleId(Integer cycleId) {
 
-	public List<ObjectiveDto> getAll() {
-		return this.repository.findAll()
-				.stream()
-				.map(entity -> mapper.map(entity, ObjectiveDto.class))
-				.map(this::calculateProgress)
-				.collect(Collectors.toList());
-	}
+        repository.findAllByCycleIdAndObjectiveFatherIdIsNull(cycleId)
+                .stream()
+                .map(ObjectiveEntity::getId)
+                .peek(keyResultService::deleteAllByObjectiveId)
+                .peek(this::deleteAllByObjectiveFatherId)
+                .peek(repository::deleteById)
+                .collect(Collectors.toList());
+    }
 
-	public List<ObjectiveDto> getAllByCycleId(Integer cycleId) {
-		return repository.findAllByCycleIdAndObjectiveFatherIdIsNull(cycleId)
-				.stream()
-				.map(entity -> mapper.map(entity, ObjectiveDto.class))
-				.map(this::calculateProgress)
-				.collect(Collectors.toList());
-	}
+    private void deleteAllByObjectiveFatherId(Integer objectiveFatherId) {
 
-	public List<ObjectiveDto> getAllByObjectiveFatherId(Integer objectiveFatherId) {
-		return repository.findAllByObjectiveFatherId(objectiveFatherId)
-				.stream()
-				.map(entity -> mapper.map(entity, ObjectiveDto.class))
-				.map(this::calculateProgress)
-				.collect(Collectors.toList());
-	}
+        this.repository.findAllByObjectiveFatherId(objectiveFatherId)
+                .stream()
+                .map(ObjectiveEntity::getId)
+                .peek(this::delete)
+                .collect(Collectors.toList());
+    }
 
-	private ObjectiveDto calculateProgress(ObjectiveDto objectiveDto) {
+    public ObjectiveDto getById(Integer id) {
 
-		var listOfProgress = this.getAllKeyResultsProgressByObjectiveId(objectiveDto.getId());
+        Optional<ObjectiveEntity> entity = repository.findById(id);
 
-		this.getAllByObjectiveFatherId(objectiveDto.getId())
-				.stream()
-				.map(ObjectiveDto::getId)
-				.peek(id -> listOfProgress.addAll(this.getAllKeyResultsProgressByObjectiveId(id)))
-				.collect(Collectors.toList());
+        if (entity.isEmpty()) {
+            throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+        }
 
-		var progress = 0.00;
-		var count = listOfProgress.size();
-		if (count > 0) {
-			var sum = listOfProgress.stream().reduce(0.0, Double::sum);
-			progress = sum / count;
-		}
+        var objectiveDto = mapper.map(entity.get(), ObjectiveDto.class);
 
-		objectiveDto.setProgress(progress);
+        return this.calculateProgress(objectiveDto);
+    }
 
-		return objectiveDto;
-	}
+    public List<ObjectiveDto> getAll() {
+        return this.repository.findAll()
+                .stream()
+                .map(entity -> mapper.map(entity, ObjectiveDto.class))
+                .map(this::calculateProgress)
+                .collect(Collectors.toList());
+    }
 
-	private List<Double> getAllKeyResultsProgressByObjectiveId(Integer objectiveId) {
+    public List<ObjectiveDto> getAllByCycleId(Integer cycleId) {
+        return repository.findAllByCycleIdAndObjectiveFatherIdIsNull(cycleId)
+                .stream()
+                .map(entity -> mapper.map(entity, ObjectiveDto.class))
+                .map(this::calculateProgress)
+                .collect(Collectors.toList());
+    }
 
-		return this.keyResultService.getAllByObjectiveId(objectiveId)
-				.stream()
-				.map(KeyResultDto::getProgress)
-				.map(this::prepareProgressToObjectiveProgress)
-				.collect(Collectors.toList());
-	}
+    public List<ObjectiveDto> getAllByObjectiveFatherId(Integer objectiveFatherId) {
+        return repository.findAllByObjectiveFatherIdOrderByTeamNameAsc(objectiveFatherId)
+                .stream()
+                .map(entity -> mapper.map(entity, ObjectiveDto.class))
+                .map(this::calculateProgress)
+                .collect(Collectors.toList());
+    }
 
-	private Double prepareProgressToObjectiveProgress(Double progress) {
+    private ObjectiveDto calculateProgress(ObjectiveDto objectiveDto) {
 
-		if (progress > PROGRESS_LIMIT)
-			return PROGRESS_LIMIT;
-		return progress;
-	}
+        var listOfProgress = this.getAllKeyResultsProgressByObjectiveId(objectiveDto.getId());
+
+        this.getAllByObjectiveFatherId(objectiveDto.getId())
+                .stream()
+                .map(ObjectiveDto::getId)
+                .peek(id -> listOfProgress.addAll(this.getAllKeyResultsProgressByObjectiveId(id)))
+                .collect(Collectors.toList());
+
+        var progress = 0.00;
+        var count = listOfProgress.size();
+        if (count > 0) {
+            var sum = listOfProgress.stream().reduce(0.0, Double::sum);
+            progress = sum / count;
+        }
+
+        objectiveDto.setProgress(progress);
+
+        return objectiveDto;
+    }
+
+    private List<Double> getAllKeyResultsProgressByObjectiveId(Integer objectiveId) {
+
+        return this.keyResultService.getAllByObjectiveId(objectiveId)
+                .stream()
+                .map(KeyResultDto::getProgress)
+                .map(this::prepareProgressToObjectiveProgress)
+                .collect(Collectors.toList());
+    }
+
+    private Double prepareProgressToObjectiveProgress(Double progress) {
+
+        if (progress > PROGRESS_LIMIT)
+            return PROGRESS_LIMIT;
+        return progress;
+    }
 }

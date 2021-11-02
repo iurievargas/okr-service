@@ -14,98 +14,120 @@ import java.util.stream.Collectors;
 @Service
 public class KeyResultService {
 
-	private static final String NOT_FOUND_MESSAGE = "There is no key result with this id";
+    private static final String NOT_FOUND_MESSAGE = "There is no key result with this id";
 
-	@Autowired
-	private KeyResultRepository repository;
+    @Autowired
+    private KeyResultRepository repository;
 
-	@Autowired
-	private KeyResultUpdateHistoryService keyResultUpdateHistoryService;
+    @Autowired
+    private KeyResultUpdateHistoryService keyResultUpdateHistoryService;
 
-	@Autowired
-	private ModelMapper mapper;
+    @Autowired
+    private InitiativeService initiativeService;
 
-	public KeyResultDto insert(KeyResultDto keyResultDto) {
-		KeyResultDto keyResult = mapper
-				.map(repository.save(mapper.map(keyResultDto, KeyResultEntity.class)), KeyResultDto.class);
+    @Autowired
+    private ModelMapper mapper;
 
-		this.keyResultUpdateHistoryService.save(keyResult.getId(), keyResult.getValue());
+    public KeyResultDto insert(KeyResultDto keyResultDto) {
+        keyResultDto = mapper
+                .map(repository.save(mapper.map(keyResultDto, KeyResultEntity.class)), KeyResultDto.class);
 
-		return keyResult;
-	}
+        this.keyResultUpdateHistoryService.save(keyResultDto.getId(), keyResultDto.getValue());
 
-	public KeyResultDto update(KeyResultDto keyResultDto, Integer id) {
+        return this.getById(keyResultDto.getId());
+    }
 
-		Optional<KeyResultEntity> entity = repository.findById(id);
+    public KeyResultDto update(KeyResultDto keyResultDto, Integer id) {
 
-		if (entity.isEmpty()) {
-			throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
-		}
+        Optional<KeyResultEntity> entity = repository.findById(id);
 
-		KeyResultEntity keyResultEntity = mapper.map(keyResultDto, KeyResultEntity.class);
-		keyResultEntity.setId(id);
+        if (entity.isEmpty()) {
+            throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+        }
 
-		this.keyResultUpdateHistoryService.save(keyResultEntity.getId(), keyResultEntity.getValue());
+        KeyResultEntity keyResultEntity = mapper.map(keyResultDto, KeyResultEntity.class);
+        keyResultEntity.setId(id);
 
-		return mapper
-				.map(repository.save(keyResultEntity), KeyResultDto.class);
-	}
+        this.keyResultUpdateHistoryService.save(keyResultEntity.getId(), keyResultEntity.getValue());
 
-	public void delete(Integer id) {
+        keyResultDto = mapper
+                .map(repository.save(keyResultEntity), KeyResultDto.class);
 
-		Optional<KeyResultEntity> entity = repository.findById(id);
+        return this.calculateProgress(keyResultDto);
 
-		if (entity.isEmpty()) {
-			throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
-		}
+    }
 
-		repository.delete(entity.get());
-	}
+    public void deleteAllByObjectiveId(Integer id) {
 
-	public KeyResultDto getById(Integer id) {
+        this.repository.findAllByObjectiveId(id)
+                .stream()
+                .map(KeyResultEntity::getId)
+                .peek(this::delete)
+                .collect(Collectors.toList());
+    }
 
-		Optional<KeyResultEntity> entity = repository.findById(id);
+    public void delete(Integer id) {
 
-		if (entity.isEmpty()) {
-			throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
-		}
+        repository.findById(id)
+                .stream()
+                .map(KeyResultEntity::getId)
+                .peek(initiativeService::deleteAllByKeyResultId)
+                .peek(keyResultUpdateHistoryService::deleteAllByKeyResultId)
+                .peek(repository::deleteById)
+                .collect(Collectors.toList());
+    }
 
-		var keyResultDto = mapper.map(entity.get(), KeyResultDto.class);
-		keyResultDto = this.calculateProgress(keyResultDto);
+    public KeyResultDto getById(Integer id) {
 
-		return keyResultDto;
+        Optional<KeyResultEntity> entity = repository.findById(id);
 
-	}
+        if (entity.isEmpty()) {
+            throw new IllegalArgumentException(NOT_FOUND_MESSAGE);
+        }
 
-	public List<KeyResultDto> getAll() {
+        var keyResultDto = mapper.map(entity.get(), KeyResultDto.class);
+        keyResultDto = this.calculateProgress(keyResultDto);
 
-		return this.repository.findAll()
-				.stream()
-				.map(entity -> mapper.map(entity, KeyResultDto.class))
-				.map(this::calculateProgress)
-				.collect(Collectors.toList());
-	}
+        return keyResultDto;
 
-	public List<KeyResultDto> getAllByObjectiveId(Integer objectiveId) {
+    }
 
-		return this.repository.findAllByObjectiveId(objectiveId)
-				.stream()
-				.map(entity -> mapper.map(entity, KeyResultDto.class))
-				.map(this::calculateProgress)
-				.collect(Collectors.toList());
-	}
+    public List<KeyResultDto> getAll() {
 
-	private KeyResultDto calculateProgress(KeyResultDto keyResult) {
+        return this.repository.findAll()
+                .stream()
+                .map(entity -> mapper.map(entity, KeyResultDto.class))
+                .map(this::calculateProgress)
+                .collect(Collectors.toList());
+    }
 
-		var baseline = keyResult.getBaseline();
-		var target = keyResult.getTarget();
-		var result = keyResult.getValue();
+    public List<KeyResultDto> getAllByObjectiveId(Integer objectiveId) {
 
-		var progress = ((result - baseline) / (target - baseline)) * 100;
+        return this.repository.findAllByObjectiveIdOrderByTeamNameAsc(objectiveId)
+                .stream()
+                .map(entity -> mapper.map(entity, KeyResultDto.class))
+                .map(this::calculateProgress)
+                .collect(Collectors.toList());
+    }
 
-		keyResult.setProgress(progress);
+    private KeyResultDto calculateProgress(KeyResultDto keyResult) {
 
-		return keyResult;
-	}
+        var baseline = keyResult.getBaseline();
+        var target = keyResult.getTarget();
+        var value = keyResult.getValue();
+
+        var progress = 0.0;
+        if (baseline.equals(target)) {
+            progress = ((value - target) * 100) / target;
+        } else {
+            progress = ((value - baseline) / (target - baseline)) * 100;
+        }
+
+        progress = Math.round(progress);
+
+        keyResult.setProgress(progress);
+
+        return keyResult;
+    }
 
 }

@@ -9,6 +9,7 @@ import com.ilegra.okr.service.KeyResultService;
 import com.ilegra.okr.service.ObjectiveService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,82 +21,112 @@ import java.util.stream.Collectors;
 @RequestMapping("/v1/objectives")
 public class ObjectiveApi {
 
-	@Autowired
-	private ObjectiveService objectiveService;
+    @Value("${AppSecret}")
+    private String correctAppSecret;
 
-	@Autowired
-	private KeyResultService keyResultService;
+    @Autowired
+    private ObjectiveService objectiveService;
 
-	@Autowired
-	private ModelMapper mapper;
+    @Autowired
+    private KeyResultService keyResultService;
 
-	@PostMapping
-	public ResponseEntity<ObjectiveResponseModel> save(@RequestBody ObjectiveRequestModel model) {
+    @Autowired
+    private ModelMapper mapper;
 
-		var dto = this.objectiveService.insert(mapper.map(model, ObjectiveDto.class));
+    @PostMapping
+    public ResponseEntity<ObjectiveResponseModel> save(@RequestBody ObjectiveRequestModel model,
+                                                       @RequestHeader String appSecret) {
 
-		var response = mapper.map(this.objectiveService.getById(dto.getId()), ObjectiveResponseModel.class);
-		return new ResponseEntity<>(response, HttpStatus.OK);
-	}
+        if (appSecret == null || !appSecret.equals(correctAppSecret))
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
-	@PutMapping("/{id}")
-	public ResponseEntity<ObjectiveResponseModel> update(@RequestBody ObjectiveRequestModel model,
-														 @PathVariable("id") Integer id) {
+        var dto = this.objectiveService.insert(mapper.map(model, ObjectiveDto.class));
 
-		var dto = this.objectiveService.update(mapper.map(model, ObjectiveDto.class), id);
-		var response = mapper.map(dto, ObjectiveResponseModel.class);
+        var response = mapper.map(this.objectiveService.getById(dto.getId()), ObjectiveResponseModel.class);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
-	}
+    @PutMapping("/{id}")
+    public ResponseEntity<ObjectiveResponseModel> update(@RequestBody ObjectiveRequestModel model,
+                                                         @PathVariable("id") Integer id,
+                                                         @RequestHeader String appSecret) {
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
+        if (appSecret == null || !appSecret.equals(correctAppSecret))
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
-		this.objectiveService.delete(id);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-	}
+        var dto = this.objectiveService.update(mapper.map(model, ObjectiveDto.class), id);
+        var response = mapper.map(dto, ObjectiveResponseModel.class);
 
-	@GetMapping("/{id}")
-	public ResponseEntity<ObjectiveResponseModel> getById(@PathVariable("id") Integer id) {
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
 
-		var response = mapper.map(this.objectiveService.getById(id), ObjectiveResponseModel.class);
-		return new ResponseEntity<>(response, HttpStatus.OK);
-	}
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") Integer id,
+                                       @RequestHeader String appSecret) {
 
-	@GetMapping
-	public ResponseEntity<List<ObjectiveResponseModel>> getAll() {
+        if (appSecret == null || !appSecret.equals(correctAppSecret))
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
-		var response = this.objectiveService
-				.getAll()
-				.stream()
-				.map(dto -> mapper.map(dto, ObjectiveResponseModel.class))
-				.collect(Collectors.toList());
+        this.objectiveService.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
-		return new ResponseEntity<>(response, HttpStatus.OK);
-	}
+    @GetMapping("/{id}")
+    public ResponseEntity<ObjectiveResponseModel> getById(@PathVariable("id") Integer id,
+                                                          @RequestHeader String appSecret) {
 
-	@GetMapping("/{id}/key-results")
-	public ResponseEntity<List<KeyResultResponseModel>> getAllKeyResultsById(@PathVariable("id") Integer id) {
+        if (appSecret == null || !appSecret.equals(correctAppSecret))
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
-		var response = this.keyResultService
-				.getAllByObjectiveId(id)
-				.stream()
-				.map(dto -> mapper.map(dto, KeyResultResponseModel.class))
-				.collect(Collectors.toList());
+        var response = mapper.map(this.objectiveService.getById(id), ObjectiveResponseModel.class);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
-		return new ResponseEntity<>(response, HttpStatus.OK);
-	}
+    @GetMapping
+    public ResponseEntity<List<ObjectiveResponseModel>> getAll(@RequestHeader String appSecret) {
 
-	@GetMapping("/{objectiveFatherId}/objectives")
-	public ResponseEntity<List<ObjectiveResponseModel>> getAllObjectivesByObjectiveFatherId(
-			@PathVariable("objectiveFatherId") Integer objectiveFatherId) {
+        if (appSecret == null || !appSecret.equals(correctAppSecret))
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 
-		var response = this.objectiveService
-				.getAllByObjectiveFatherId(objectiveFatherId)
-				.stream()
-				.map(dto -> mapper.map(dto, ObjectiveResponseModel.class))
-				.collect(Collectors.toList());
+        var response = this.objectiveService
+                .getAll()
+                .stream()
+                .map(dto -> mapper.map(dto, ObjectiveResponseModel.class))
+                .collect(Collectors.toList());
 
-		return new ResponseEntity<>(response, HttpStatus.OK);
-	}
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/key-results")
+    public ResponseEntity<List<KeyResultResponseModel>> getAllKeyResultsById(@PathVariable("id") Integer id,
+                                                                             @RequestHeader String appSecret) {
+
+        if (appSecret == null || !appSecret.equals(correctAppSecret))
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+
+        var response = this.keyResultService
+                .getAllByObjectiveId(id)
+                .stream()
+                .map(dto -> mapper.map(dto, KeyResultResponseModel.class))
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{objectiveFatherId}/objectives")
+    public ResponseEntity<List<ObjectiveResponseModel>> getAllObjectivesByObjectiveFatherId(
+            @PathVariable("objectiveFatherId") Integer objectiveFatherId,
+            @RequestHeader String appSecret) {
+
+        if (appSecret == null || !appSecret.equals(correctAppSecret))
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+
+        var response = this.objectiveService
+                .getAllByObjectiveFatherId(objectiveFatherId)
+                .stream()
+                .map(dto -> mapper.map(dto, ObjectiveResponseModel.class))
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
